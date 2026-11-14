@@ -96,7 +96,53 @@ Retrieves pre-loaded multi-ward telemetry scenarios for 1-click evaluator demons
 
 ---
 
-## 4. Civic Briefing Analysis Endpoint
+## 4. Standalone Fast Decision API for Hotspots
+
+### `POST /api/decision/hotspots`
+Sub-millisecond ($< 2$ ms) hotspot classifier and emergency triage calculator. Returns verified hotspot archetypes, $PM_{2.5}/PM_{10}$ ratios, and data anomalies directly without waiting for LLM synthesis.
+
+**Headers:** `Authorization: Bearer <token>`  
+**Request Body:**
+```json
+{
+  "presetId": "crisis", // Optional: "baseline" | "crisis" | "post_action"
+  "text": "Ward-4, SNS_01, PM2.5, 380, ug/m3", // Optional: Raw text/CSV
+  "rows": [ ... ] // Optional: RawRow[] objects
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "latency_ms": 1.15,
+  "instant_triage_banner": {
+    "alert_level": "EMERGENCY_CRITICAL",
+    "primary_headline": "CRITICAL CIVIC ALERT: Severe Air Emergency...",
+    "emergency_trigger_code": "GRAP_STAGE_IV_SEVERE_PLUS",
+    "urgent_action_required": true,
+    "worst_affected_ward": "Ward 4 - Industrial Belt",
+    "peak_pm25_ugm3": 380
+  },
+  "classified_hotspots": [
+    {
+      "hotspot_id": "HS_COMBUSTION_Ward_4_Industrial_Belt",
+      "archetype": "ACUTE_COMBUSTION_BIOMASS",
+      "ward_name": "Ward 4 - Industrial Belt",
+      "trigger_reason": "High PM2.5 (380 ug/m3) with fine particulate ratio (0.84) confirms acute combustion plume...",
+      "severity": "SEVERE",
+      "confidence_score": 0.92,
+      "traceability_refs": ["ROW_10"]
+    }
+  ],
+  "data_quality_flags": [ ... ],
+  "ward_aggregates": { ... }
+}
+```
+
+---
+
+## 5. Civic Briefing Analysis Endpoint
 
 ### `POST /api/briefing/analyze`
 Executes the two-stage `gemini-3.8-flash` pipeline with the deterministic Decision Engine and $O(1)$ SHA-256 LRU cache.
