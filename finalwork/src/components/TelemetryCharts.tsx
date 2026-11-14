@@ -10,22 +10,72 @@ interface TelemetryChartsProps {
 }
 
 export const TelemetryCharts: React.FC<TelemetryChartsProps> = ({ readings }) => {
-  // Extract PM2.5 readings for wards
+  // 1. Extract real PM2.5 readings for wards
   const pm25Readings = readings
-    .filter(r => r.pollutant === 'PM2.5' && r.normalized_value_ugm3 !== null)
+    .filter(r => r.pollutant === 'PM2.5' && r.normalized_value_ugm3 !== null && r.validation_status === 'VALID')
     .map(r => ({
       ward: r.ward_name,
       val: r.normalized_value_ugm3 as number,
       severity: r.aqi_severity,
-      rowId: r.row_id
+      rowId: r.row_id,
+      timestamp: r.timestamp_iso
     }));
 
-  const maxVal = Math.max(400, ...pm25Readings.map(p => p.val));
+  const maxVal = Math.max(350, ...pm25Readings.map(p => p.val));
+
+  // 2. Extract chronological trend points directly from CSV telemetry
+  const trendPoints = readings
+    .filter(r => (r.pollutant === 'PM2.5' || r.pollutant === 'PM10') && r.normalized_value_ugm3 !== null && r.validation_status === 'VALID')
+    .slice(0, 10)
+    .map((r, i) => {
+      // Parse time string if available (e.g. 08:30 or 2026-11-14T08:30:00Z)
+      let timeLabel = `R${i + 1}`;
+      if (r.timestamp_iso) {
+        if (r.timestamp_iso.includes('T')) {
+          const parts = r.timestamp_iso.split('T')[1];
+          timeLabel = parts ? parts.slice(0, 5) : timeLabel;
+        } else if (r.timestamp_iso.includes(':')) {
+          timeLabel = r.timestamp_iso.slice(0, 5);
+        }
+      }
+      return {
+        label: timeLabel,
+        val: r.normalized_value_ugm3 as number,
+        rowId: r.row_id,
+        pollutant: r.pollutant,
+        ward: r.ward_name
+      };
+    });
+
+  // Calculate dynamic SVG coordinates from real telemetry
+  const svgWidth = 320;
+  const svgHeight = 90;
+  const padX = 25;
+  const padY = 18;
+  const maxTrendVal = Math.max(300, ...trendPoints.map(t => t.val));
+
+  const coords = trendPoints.map((pt, i) => {
+    const x = trendPoints.length > 1
+      ? padX + (i / (trendPoints.length - 1)) * (svgWidth - 2 * padX)
+      : svgWidth / 2;
+    const y = svgHeight - padY - (pt.val / maxTrendVal) * (svgHeight - 2 * padY);
+    return { ...pt, x: Math.round(x), y: Math.round(y) };
+  });
+
+  const pathD = coords.length > 0
+    ? coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x} ${c.y}`).join(' ')
+    : '';
+
+  const areaD = coords.length > 0
+    ? `${pathD} L ${coords[coords.length - 1].x} ${svgHeight - padY} L ${coords[0].x} ${svgHeight - padY} Z`
+    : '';
+
+  const peakPoint = coords.reduce((max, c) => (c.val > (max?.val || 0) ? c : max), coords[0]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-12 gap-4 pt-2">
       
-      {/* 1. Ward Particulate Benchmark Bar Chart */}
+      {/* 1. Ward Particulate Benchmark Bar Chart — 100% Derived from CSV */}
       <div className="md:col-span-7 bg-white p-4 rounded-xl border border-emerald-100 shadow-2xs space-y-3">
         <div className="flex items-center justify-between border-b border-slate-100 pb-2">
           <div className="flex items-center gap-2">
@@ -56,11 +106,11 @@ export const TelemetryCharts: React.FC<TelemetryChartsProps> = ({ readings }) =>
               return (
                 <div key={idx} className="space-y-1">
                   <div className="flex items-center justify-between text-xs font-medium">
-                    <span className="text-slate-800 truncate max-w-[200px] text-[11px]">
+                    <span className="text-slate-800 truncate max-w-[200px] text-[11px]" title={item.ward}>
                       {item.ward}
                     </span>
                     <span className="font-mono text-xs font-bold flex items-center gap-1.5">
-                      <span className={isCritical ? 'text-rose-700' : isWarning ? 'text-amber-700' : 'text-emerald-700'}>
+                      <span className={isCritical ? 'text-rose-700 font-extrabold' : isWarning ? 'text-amber-700' : 'text-emerald-700'}>
                         {item.val} µg/m³
                       </span>
                       {isCritical && (
@@ -71,7 +121,7 @@ export const TelemetryCharts: React.FC<TelemetryChartsProps> = ({ readings }) =>
                     </span>
                   </div>
 
-                  {/* Visual Bar */}
+                  {/* Visual Bar with Actual Data Proportions */}
                   <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden relative">
                     {/* Safe Limit Marker (60 ug) */}
                     <div
@@ -101,77 +151,99 @@ export const TelemetryCharts: React.FC<TelemetryChartsProps> = ({ readings }) =>
             })
           ) : (
             <div className="py-4 text-center text-xs text-slate-400 font-mono">
-              Load telemetry preset to display ward comparison bars
+              No valid PM2.5 readings in telemetry input
             </div>
           )}
         </div>
       </div>
 
-      {/* 2. Diurnal Timeline Progression Line Graph (SVG) */}
+      {/* 2. Diurnal Timeline Progression Line Graph (SVG) — 100% Derived from CSV */}
       <div className="md:col-span-5 bg-white p-4 rounded-xl border border-emerald-100 shadow-2xs space-y-3 flex flex-col justify-between">
         <div className="flex items-center justify-between border-b border-slate-100 pb-2">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-emerald-600" />
             <span className="font-heading text-xs font-bold uppercase tracking-wider text-slate-900">
-              Diurnal Morning Spike Trend
+              CSV Telemetry Trend ({trendPoints.length} Points)
             </span>
           </div>
-          <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
-            07:30 - 09:00 IST
-          </span>
+          {peakPoint && (
+            <span className="text-[10px] font-mono text-rose-800 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded font-bold">
+              Peak: {peakPoint.val} µg
+            </span>
+          )}
         </div>
 
-        {/* SVG Sparkline Graph */}
+        {/* Dynamic SVG Sparkline Graph from Real CSV Coordinates */}
         <div className="relative py-2">
-          <svg viewBox="0 0 300 90" className="w-full h-20 overflow-visible">
-            {/* Guide Gridlines */}
-            <line x1="0" y1="20" x2="300" y2="20" stroke="#F1F5F9" strokeDasharray="3 3" />
-            <line x1="0" y1="50" x2="300" y2="50" stroke="#F1F5F9" strokeDasharray="3 3" />
-            <line x1="0" y1="80" x2="300" y2="80" stroke="#E2E8F0" />
+          {coords.length > 1 ? (
+            <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="w-full h-20 overflow-visible">
+              {/* Threshold Line: 300 ug Critical */}
+              <line
+                x1={padX}
+                y1={svgHeight - padY - (300 / maxTrendVal) * (svgHeight - 2 * padY)}
+                x2={svgWidth - padX}
+                y2={svgHeight - padY - (300 / maxTrendVal) * (svgHeight - 2 * padY)}
+                stroke="#FDA4AF"
+                strokeDasharray="2 2"
+              />
+              <text x={svgWidth - padX - 60} y={svgHeight - padY - (300 / maxTrendVal) * (svgHeight - 2 * padY) - 3} fill="#E11D48" fontSize="8" fontFamily="monospace">
+                GRAP IV (300)
+              </text>
 
-            {/* Threshold Line: 300 ug Critical */}
-            <line x1="0" y1="30" x2="300" y2="30" stroke="#FDA4AF" strokeDasharray="2 2" />
-            <text x="230" y="26" fill="#E11D48" fontSize="8" fontFamily="monospace">GRAP IV (300)</text>
+              {/* Trend Gradient Area */}
+              <defs>
+                <linearGradient id="realTrendGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#059669" stopOpacity="0.35" />
+                  <stop offset="60%" stopColor="#E11D48" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.0" />
+                </linearGradient>
+              </defs>
 
-            {/* Trend Gradient Area */}
-            <defs>
-              <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#059669" stopOpacity="0.3" />
-                <stop offset="60%" stopColor="#E11D48" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.0" />
-              </linearGradient>
-            </defs>
+              <path d={areaD} fill="url(#realTrendGradient)" />
 
-            <path
-              d="M 10 75 Q 70 65, 120 45 T 200 15 T 280 40 L 280 80 L 10 80 Z"
-              fill="url(#trendGradient)"
-            />
+              {/* Main Line connecting CSV points */}
+              <path d={pathD} fill="none" stroke="#059669" strokeWidth="2.5" />
 
-            {/* Main Trend Line */}
-            <path
-              d="M 10 75 Q 70 65, 120 45 T 200 15 T 280 40"
-              fill="none"
-              stroke="#059669"
-              strokeWidth="2.5"
-            />
-
-            {/* Data Points */}
-            <circle cx="10" cy="75" r="3.5" fill="#059669" stroke="#FFFFFF" strokeWidth="1.5" />
-            <circle cx="120" cy="45" r="3.5" fill="#D97706" stroke="#FFFFFF" strokeWidth="1.5" />
-            <circle cx="200" cy="15" r="4.5" fill="#DC2626" stroke="#FFFFFF" strokeWidth="2" />
-            <circle cx="280" cy="40" r="3.5" fill="#059669" stroke="#FFFFFF" strokeWidth="1.5" />
-
-            {/* Point Labels */}
-            <text x="6" y="88" fill="#64748B" fontSize="8" fontFamily="monospace">07:30</text>
-            <text x="110" y="88" fill="#64748B" fontSize="8" fontFamily="monospace">08:00</text>
-            <text x="190" y="88" fill="#DC2626" fontSize="8" fontWeight="bold" fontFamily="monospace">08:30 (Peak)</text>
-            <text x="268" y="88" fill="#64748B" fontSize="8" fontFamily="monospace">09:00</text>
-          </svg>
+              {/* Data Points from CSV */}
+              {coords.map((c, i) => {
+                const isPeak = c === peakPoint;
+                return (
+                  <g key={i}>
+                    <circle
+                      cx={c.x}
+                      cy={c.y}
+                      r={isPeak ? 4.5 : 3}
+                      fill={isPeak ? '#DC2626' : c.val > 150 ? '#D97706' : '#059669'}
+                      stroke="#FFFFFF"
+                      strokeWidth="1.5"
+                    />
+                    <text
+                      x={c.x}
+                      y={svgHeight - 2}
+                      textAnchor="middle"
+                      fill={isPeak ? '#DC2626' : '#64748B'}
+                      fontSize="8"
+                      fontFamily="monospace"
+                      fontWeight={isPeak ? 'bold' : 'normal'}
+                    >
+                      {c.label}
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
+          ) : (
+            <div className="h-20 flex items-center justify-center text-xs text-slate-400 font-mono">
+              Insufficient time points to draw graph
+            </div>
+          )}
         </div>
 
         <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
-          <span>Inversion trap peaked at 08:30</span>
-          <span className="text-emerald-700 font-semibold">Morning Rush Hours</span>
+          <span>{peakPoint ? `Max surge detected in ${peakPoint.ward}` : 'Awaiting sensor stream'}</span>
+          <span className="text-emerald-700 font-semibold font-mono">
+            {readings.filter(r => r.validation_status === 'VALID').length} Valid / {readings.length} Total
+          </span>
         </div>
       </div>
 

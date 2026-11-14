@@ -9,6 +9,8 @@ import { InstantTriageBanner } from './types/decisionEngine.js';
 import { CivicBriefingOutput, CleanedReadingItemSchema, DataQualityFlagItemSchema } from './types/briefingSchema.js';
 import { PRESET_BASELINE_DAY, PRESET_CRISIS_DAY, PRESET_POST_INTERVENTION_DAY } from './data/presets.js';
 import { normalizeAndClassifyHotspots } from './services/fastDecisionEngine.js';
+import { generateDeterministicGroundedBrief } from './services/geminiPipeline.js';
+import { parseUniversalTelemetry } from './services/universalDataParser.js';
 import { downloadStructuredAuditJson, downloadCleanedTelemetryCsv, StructuredAuditPayload } from './services/structuredExport.js';
 import { z } from 'zod';
 
@@ -72,11 +74,16 @@ export const App: React.FC = () => {
       : PRESET_POST_INTERVENTION_DAY;
 
     // Run sub-second deterministic triage & normalization locally
-    const decision = normalizeAndClassifyHotspots(sourceRows);
+    const decision = normalizeAndClassifyHotspots(sourceRows, fullBrief ? JSON.stringify(fullBrief) : undefined);
 
     setTriage(decision.instant_triage_banner);
     setReadings(decision.normalized_readings as any);
     setFlags(decision.data_quality_flags as any);
+
+    // Synchronously generate grounded briefing so Stage 2 and Stage 3 immediately reflect CSV data
+    const localBrief = generateDeterministicGroundedBrief(decision, fullBrief);
+    setPreviousBrief(fullBrief);
+    setFullBrief(localBrief);
 
     // Also trigger server analysis in background if token available
     triggerServerAnalysis({ presetId });
@@ -140,6 +147,21 @@ export const App: React.FC = () => {
     if (payload.presetId) {
       loadPresetData(payload.presetId as any);
     } else {
+      setIsLoading(true);
+      if (payload.text) {
+        // Instant local parsing of CSV/text telemetry
+        const parsedRows = parseUniversalTelemetry(payload.text);
+        if (parsedRows.length > 0) {
+          const decision = normalizeAndClassifyHotspots(parsedRows, fullBrief ? JSON.stringify(fullBrief) : undefined);
+          setTriage(decision.instant_triage_banner);
+          setReadings(decision.normalized_readings as any);
+          setFlags(decision.data_quality_flags as any);
+
+          const localBrief = generateDeterministicGroundedBrief(decision, fullBrief);
+          setPreviousBrief(fullBrief);
+          setFullBrief(localBrief);
+        }
+      }
       triggerServerAnalysis(payload);
     }
   };

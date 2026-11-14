@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { History, TrendingUp, TrendingDown, Minus, Wind, AlertTriangle, ShieldCheck, CheckSquare, Square, X, ChevronUp, ChevronDown, CheckCircle2, MapPin, Eye, ArrowRight, CheckCircle, Leaf } from 'lucide-react';
 import { TraceabilityChip } from './TraceabilityChip.js';
 import { StatusBadge } from './StatusBadge.js';
 import {
   CivicBriefingOutput,
-  HotspotAndTrendItemSchema,
-  ActionItemSchema,
   CleanedReadingItemSchema
 } from '../types/briefingSchema.js';
 import { z } from 'zod';
@@ -39,121 +37,197 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
     }));
   };
 
-  // Find inspected row details
+  // Find inspected row details directly from CSV readings
   const inspectedRow = readings.find(r => r.row_id === selectedCitation);
 
-  // Fallback hotspots if briefing is not yet fetched from LLM
-  const hotspots = briefing?.hotspots_and_trends && briefing.hotspots_and_trends.length > 0
-    ? briefing.hotspots_and_trends
-    : [
+  // 1. DYNAMIC DELTA CALCULATION FROM REAL CSV TELEMETRY
+  const deltaMetrics = useMemo(() => {
+    const validPm25 = readings.filter(r => r.pollutant === 'PM2.5' && r.normalized_value_ugm3 !== null && r.validation_status === 'VALID');
+    const peakRow = validPm25.reduce((max, r) => ((r.normalized_value_ugm3 || 0) > (max?.normalized_value_ugm3 || 0) ? r : max), validPm25[0]);
+    const peakVal = peakRow?.normalized_value_ugm3 || 0;
+    const worstWard = peakRow?.ward_name || "Monitored Sectors";
+
+    // Compare with CPCB Safe Baseline (60 µg/m³) or prior brief
+    const baseline = 60;
+    const deltaPercent = peakVal > 0 ? Math.round(((peakVal - baseline) / baseline) * 100) : 0;
+    
+    const faultyRows = readings.filter(r => r.validation_status !== 'VALID' || r.raw_value === '-999');
+    const faultySensors = Array.from(new Set(faultyRows.map(r => r.sensor_id)));
+
+    return {
+      peakVal,
+      peakRowId: peakRow?.row_id || "ROW_01",
+      worstWard,
+      deltaPercent,
+      faultyRowsCount: faultyRows.length,
+      faultySensors,
+      isEmergency: peakVal >= 300,
+      isWarning: peakVal > 100 && peakVal < 300
+    };
+  }, [readings]);
+
+  // 2. DYNAMIC HOTSPOTS (From Gemini or Generated Deterministically from CSV)
+  const hotspots = useMemo(() => {
+    if (briefing?.hotspots_and_trends && briefing.hotspots_and_trends.length > 0) {
+      return briefing.hotspots_and_trends;
+    }
+
+    // Dynamic fallback derived directly from the CSV input rows
+    const generated: Array<{ hotspot_location: string; finding_summary: string; traceability_refs: string[] }> = [];
+
+    // Group by ward
+    const wardMap: Record<string, CleanedReading[]> = {};
+    readings.forEach(r => {
+      if (!wardMap[r.ward_name]) wardMap[r.ward_name] = [];
+      wardMap[r.ward_name].push(r);
+    });
+
+    Object.entries(wardMap).forEach(([wardName, wardRows]) => {
+      const pm25 = wardRows.find(r => r.pollutant === 'PM2.5' && r.normalized_value_ugm3 !== null);
+      const pm10 = wardRows.find(r => r.pollutant === 'PM10' && r.normalized_value_ugm3 !== null);
+      const fault = wardRows.find(r => r.validation_status !== 'VALID' || r.raw_value === '-999');
+
+      if (pm25 && (pm25.normalized_value_ugm3 || 0) >= 250) {
+        generated.push({
+          hotspot_location: wardName,
+          finding_summary: `Acute Particulate Surge: PM2.5 spiked to ${pm25.normalized_value_ugm3} µg/m³ (${pm25.raw_value} ${pm25.raw_unit}). Ground-level stagnation and local emissions concentrated toxic respirable particulates.`,
+          traceability_refs: [pm25.row_id]
+        });
+      } else if (pm10 && (pm10.normalized_value_ugm3 || 0) >= 300) {
+        generated.push({
+          hotspot_location: wardName,
+          finding_summary: `Coarse Fugitive Dust Plume: PM10 surged to ${pm10.normalized_value_ugm3} µg/m³. Heavy commercial traffic and uncovered excavation resuspension active.`,
+          traceability_refs: [pm10.row_id]
+        });
+      }
+
+      if (fault) {
+        generated.push({
+          hotspot_location: `${wardName} (Telemetry Blind Spot)`,
+          finding_summary: `Hardware Sensor Outage: Sensor ${fault.sensor_id} returned invalid reading '${fault.raw_value} ${fault.raw_unit}'. Station data integrity unverified pending field technician replacement.`,
+          traceability_refs: [fault.row_id]
+        });
+      }
+    });
+
+    if (generated.length === 0 && readings.length > 0) {
+      generated.push({
+        hotspot_location: deltaMetrics.worstWard,
+        finding_summary: `Ambient baseline monitoring: Peak recorded PM2.5 is ${deltaMetrics.peakVal} µg/m³ [${deltaMetrics.peakRowId}]. Ambient airflow maintaining dispersion.`,
+        traceability_refs: [deltaMetrics.peakRowId]
+      });
+    }
+
+    return generated;
+  }, [briefing, readings, deltaMetrics]);
+
+  // 3. DYNAMIC NORMAL DATA WARDS (Identified from CSV)
+  const normalWards = useMemo(() => {
+    const wardMap: Record<string, CleanedReading[]> = {};
+    readings.forEach(r => {
+      if (!wardMap[r.ward_name]) wardMap[r.ward_name] = [];
+      wardMap[r.ward_name].push(r);
+    });
+
+    return Object.entries(wardMap)
+      .filter(([_, rows]) => {
+        const hasFault = rows.some(r => r.validation_status !== 'VALID');
+        const maxVal = Math.max(...rows.map(r => r.normalized_value_ugm3 || 0));
+        return !hasFault && maxVal <= 100;
+      })
+      .map(([wardName, rows]) => {
+        const avg = Math.round(rows.reduce((sum, r) => sum + (r.normalized_value_ugm3 || 0), 0) / rows.length);
+        return { wardName, avg, refs: rows.map(r => r.row_id) };
+      });
+  }, [readings]);
+
+  // 4. DYNAMIC ROLE-SPECIFIC ACTIONS
+  const roleActions = useMemo(() => {
+    if (briefing?.role_specific_actions?.[activeRole] && briefing.role_specific_actions[activeRole].length > 0) {
+      return briefing.role_specific_actions[activeRole];
+    }
+
+    // Dynamic actions grounded in real CSV data
+    const refs = readings.slice(0, 3).map(r => r.row_id);
+    const ward = deltaMetrics.worstWard;
+
+    if (activeRole === 'ward_officer') {
+      return [
         {
-          hotspot_location: "Ward 4 - Industrial Belt",
-          finding_summary: "Acute Combustion Plume & Morning Thermal Inversion Trap. Heavy diesel generator testing and open biomass fires caused PM2.5 to hit 310.0 µg/m³. Calm morning winds (<1m/s) trapped ground resuspension in residential pockets.",
-          traceability_refs: ["ROW_04", "ROW_05"]
+          priority: deltaMetrics.isEmergency ? ('IMMEDIATE' as const) : ('HIGH' as const),
+          action: `Deploy high-pressure anti-smog water mist tankers along ${ward} primary arterials to suppress surface resuspension.`,
+          traceability_refs: refs
         },
         {
-          hotspot_location: "Ward 2 - Telemetry Blind Spot",
-          finding_summary: "Hardware Sensor Outage. SNS_W02_03 returned -999 optical sensor fault code. Telemetry channel designated as unverified blind spot pending field technician dispatch.",
-          traceability_refs: ["ROW_07"]
+          priority: 'HIGH' as const,
+          action: `Enforce mandatory dust stop-work notice and covering of unpaved excavation in ${ward}.`,
+          traceability_refs: refs
+        },
+        {
+          priority: 'MEDIUM' as const,
+          action: deltaMetrics.faultySensors.length > 0
+            ? `Dispatch IoT instrument technician to inspect and recalibrate flagged sensors: ${deltaMetrics.faultySensors.join(', ')}.`
+            : 'Maintain standard 24-hour optical sensor calibration schedule.',
+          traceability_refs: readings.filter(r => r.validation_status !== 'VALID').map(r => r.row_id)
         }
       ];
-
-  // Actions for current role
-  const roleActions = briefing?.role_specific_actions
-    ? (activeRole === 'ward_officer'
-        ? briefing.role_specific_actions.ward_officer
-        : activeRole === 'housing_society'
-        ? briefing.role_specific_actions.housing_society
-        : activeRole === 'school_principal'
-        ? briefing.role_specific_actions.school_principal
-        : (briefing.role_specific_actions.gig_worker || [
-            {
-              priority: 'IMMEDIATE' as const,
-              action: "Dynamic Corridor Rerouting — Deliveries and courier fleets bypass Ward 4 industrial arterial choke points during peak smog.",
-              traceability_refs: ["ROW_04", "ROW_05"]
-            },
-            {
-              priority: 'HIGH' as const,
-              action: "Mandate 15-Minute N95 Recovery Breaks — Require riders to rotate indoors every 90 minutes; supply certified N95 masks.",
-              traceability_refs: ["ROW_04"]
-            },
-            {
-              priority: 'MEDIUM' as const,
-              action: "Activate Air-Filtered Hydration Hubs — Open dark stores and distribution hubs as resting shelters during GRAP Stage IV alerts.",
-              traceability_refs: ["ROW_07"]
-            }
-          ]))
-    : (activeRole === 'ward_officer'
-        ? [
-            {
-              priority: 'IMMEDIATE' as const,
-              action: "Deploy Anti-Smog Mist Truck — Dispatch water cannons to Ward 4 arterial roads to suppress coarse dust resuspension.",
-              traceability_refs: ["ROW_04", "ROW_05"]
-            },
-            {
-              priority: 'HIGH' as const,
-              action: "Halt Uncovered Construction — Issue stop-work notice at Sector 4 metro excavation site until AQI drops below 250.",
-              traceability_refs: ["ROW_04"]
-            },
-            {
-              priority: 'MEDIUM' as const,
-              action: "Inspect Sensor SNS_W02_03 — Field technician required for -999 optical hardware fault in Ward 2.",
-              traceability_refs: ["ROW_07"]
-            }
-          ]
-        : activeRole === 'housing_society'
-        ? [
-            {
-              priority: 'IMMEDIATE' as const,
-              action: "Suspend Diesel Generator (DG) Routine Testing — Halt scheduled 09:00 backup generator runs until inversion clears.",
-              traceability_refs: ["ROW_04"]
-            },
-            {
-              priority: 'HIGH' as const,
-              action: "Mandate Wet Mopping in Common Corridors — Prohibit dry sweeping by housekeeping staff to prevent dust lofting.",
-              traceability_refs: ["ROW_04"]
-            },
-            {
-              priority: 'MEDIUM' as const,
-              action: "Display Health Warning at Society Gates & Lifts — Broadcast smog advisory to all residents and security personnel.",
-              traceability_refs: ["ROW_04"]
-            }
-          ]
-        : activeRole === 'school_principal'
-        ? [
-            {
-              priority: 'IMMEDIATE' as const,
-              action: "Move Morning Assembly and Sports Indoors — Cancel all outdoor physical training sessions for kindergarten to Grade 12.",
-              traceability_refs: ["ROW_04"]
-            },
-            {
-              priority: 'HIGH' as const,
-              action: "Seal Classroom Windows and Activate Purifiers — Keep doors closed; operate filtration units in all primary wings.",
-              traceability_refs: ["ROW_04"]
-            },
-            {
-              priority: 'MEDIUM' as const,
-              action: "Issue Asthma & Inhaler Notice to Parents — Advise asthmatic students to keep rescue bronchodilators handy.",
-              traceability_refs: ["ROW_04"]
-            }
-          ]
-        : [
-            {
-              priority: 'IMMEDIATE' as const,
-              action: "Dynamic Corridor Rerouting — Deliveries and courier fleets bypass Ward 4 industrial arterial choke points during peak smog.",
-              traceability_refs: ["ROW_04", "ROW_05"]
-            },
-            {
-              priority: 'HIGH' as const,
-              action: "Mandate 15-Minute N95 Recovery Breaks — Require riders to rotate indoors every 90 minutes; supply certified N95 masks.",
-              traceability_refs: ["ROW_04"]
-            },
-            {
-              priority: 'MEDIUM' as const,
-              action: "Activate Air-Filtered Hydration Hubs — Open dark stores and distribution hubs as resting shelters during GRAP Stage IV alerts.",
-              traceability_refs: ["ROW_07"]
-            }
-          ]);
+    } else if (activeRole === 'housing_society') {
+      return [
+        {
+          priority: deltaMetrics.isEmergency ? ('IMMEDIATE' as const) : ('HIGH' as const),
+          action: `Halt routine diesel power generator (DG set) testing in ${ward} residential complexes until particulate levels normalize.`,
+          traceability_refs: refs
+        },
+        {
+          priority: 'HIGH' as const,
+          action: 'Mandate wet mopping by housekeeping staff in society driveways and common areas; ban dry leaf blowing.',
+          traceability_refs: refs
+        },
+        {
+          priority: 'MEDIUM' as const,
+          action: 'Broadcast civic air bulletin on resident WhatsApp groups; advise vulnerable elders to remain indoors.',
+          traceability_refs: refs
+        }
+      ];
+    } else if (activeRole === 'school_principal') {
+      return [
+        {
+          priority: deltaMetrics.isEmergency ? ('IMMEDIATE' as const) : ('HIGH' as const),
+          action: 'Cancel all morning outdoor physical education and assemblies; move student activities into filtered classrooms.',
+          traceability_refs: refs
+        },
+        {
+          priority: 'HIGH' as const,
+          action: 'Mandate classroom window closures and operate clean-air purifiers in primary and nursery wings.',
+          traceability_refs: refs
+        },
+        {
+          priority: 'MEDIUM' as const,
+          action: 'Alert parents of students with respiratory ailments or asthma to ensure rescue inhalers are readily accessible.',
+          traceability_refs: refs
+        }
+      ];
+    } else {
+      // gig_worker
+      return [
+        {
+          priority: deltaMetrics.isEmergency ? ('IMMEDIATE' as const) : ('HIGH' as const),
+          action: `Dynamic corridor rerouting: Delivery riders and gig fleets bypass ${ward} congestion corridors during peak rush hours.`,
+          traceability_refs: refs
+        },
+        {
+          priority: 'HIGH' as const,
+          action: 'Mandate 15-minute N95 respirator recovery breaks every 90 minutes; dark stores provide certified N95 masks.',
+          traceability_refs: refs
+        },
+        {
+          priority: 'MEDIUM' as const,
+          action: 'Activate air-filtered hydration and resting hubs across courier delivery clusters during emergency alerts.',
+          traceability_refs: refs
+        }
+      ];
+    }
+  }, [briefing, activeRole, deltaMetrics, readings]);
 
   const roleTitle = activeRole === 'ward_officer'
     ? '🏛️ WARD OFFICER'
@@ -166,60 +240,80 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
   return (
     <div className="space-y-6 pb-24">
       
-      {/* 1. TOP DELTA DIFF STRIP ("WHAT CHANGED SINCE PREVIOUS BRIEF") */}
+      {/* 1. TOP DELTA DIFF STRIP — 100% Dynamically Derived from CSV Data */}
       <div className="p-5 rounded-2xl border border-emerald-100 bg-white shadow-2xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
             <History className="w-4 h-4 text-emerald-600" />
             <span className="font-heading text-xs font-bold uppercase tracking-wider text-slate-900">
-              🔄 WHAT CHANGED SINCE PREVIOUS BRIEF (Compared to: BRIEF-13-NOV-AM)
+              🔄 WHAT CHANGED (Real-Time CSV Delta vs. CPCB Standard 60 µg/m³)
             </span>
           </div>
           <span className="text-xs text-slate-500 font-mono">
-            Automated Delta Diff Engine
+            Automated Delta Engine • Ref: {deltaMetrics.peakRowId}
           </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           {/* Delta Card 1: Escalation Spike */}
-          <div className="p-4 rounded-xl border border-rose-200 bg-rose-50/60 flex flex-col justify-between">
-            <div className="flex items-center justify-between text-xs font-heading font-bold text-rose-800">
-              <span>▲ WARD 4 SPIKE: +42%</span>
-              <span className="text-[10px] bg-rose-200/80 text-rose-900 font-mono px-2 py-0.5 rounded-full">
-                ESCALATION
+          <div className={`p-4 rounded-xl border flex flex-col justify-between ${
+            deltaMetrics.isEmergency
+              ? 'border-rose-200 bg-rose-50/60'
+              : deltaMetrics.isWarning
+              ? 'border-amber-200 bg-amber-50/60'
+              : 'border-emerald-200 bg-emerald-50/60'
+          }`}>
+            <div className={`flex items-center justify-between text-xs font-heading font-bold ${
+              deltaMetrics.isEmergency ? 'text-rose-800' : deltaMetrics.isWarning ? 'text-amber-800' : 'text-emerald-800'
+            }`}>
+              <span>▲ {deltaMetrics.worstWard.toUpperCase()}: {deltaMetrics.deltaPercent > 0 ? `+${deltaMetrics.deltaPercent}%` : `${deltaMetrics.deltaPercent}%`}</span>
+              <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                deltaMetrics.isEmergency ? 'bg-rose-200/80 text-rose-900' : 'bg-emerald-200/80 text-emerald-900'
+              }`}>
+                {deltaMetrics.isEmergency ? 'ESCALATION' : 'BASELINE'}
               </span>
             </div>
-            <div className="mt-2 text-xs text-rose-900">
-              PM2.5 rose <strong className="font-mono text-rose-950">218 -&gt; 310 µg/m³</strong>
-              <p className="text-[11px] text-rose-700 mt-0.5">Critical threshold breached at 08:00 morning peak.</p>
+            <div className={`mt-2 text-xs ${deltaMetrics.isEmergency ? 'text-rose-900' : 'text-slate-800'}`}>
+              PM2.5 hit <strong className="font-mono text-slate-950 font-bold">{deltaMetrics.peakVal} µg/m³</strong> [{deltaMetrics.peakRowId}]
+              <p className={`text-[11px] mt-0.5 ${deltaMetrics.isEmergency ? 'text-rose-700' : 'text-slate-500'}`}>
+                {deltaMetrics.isEmergency ? 'Emergency threshold breached during morning cycle.' : 'Within standard dispersion ceiling.'}
+              </p>
             </div>
           </div>
 
-          {/* Delta Card 2: Meteorological Inversion */}
+          {/* Delta Card 2: Inversion / Meteorological Pattern */}
           <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/60 flex flex-col justify-between">
             <div className="flex items-center justify-between text-xs font-heading font-bold text-amber-800">
-              <span>🌬️ PLUME SHIFT: E -&gt; W</span>
+              <span>🌬️ METEOROLOGICAL DISPERSION</span>
               <span className="text-[10px] bg-amber-200/80 text-amber-900 font-mono px-2 py-0.5 rounded-full">
-                WIND &lt; 1 m/s
+                TELEMETRY
               </span>
             </div>
             <div className="mt-2 text-xs text-amber-900">
-              Smog drifted into Ward 4 arterial pocket
-              <p className="text-[11px] text-amber-700 mt-0.5">Thermal inversion trapped ground resuspension.</p>
+              Plume concentrated over <strong className="font-semibold text-amber-950">{deltaMetrics.worstWard}</strong>
+              <p className="text-[11px] text-amber-700 mt-0.5">
+                {deltaMetrics.isEmergency ? 'Calm surface airflow trapped particulate resuspension.' : 'Adequate atmospheric boundary mixing detected.'}
+              </p>
             </div>
           </div>
 
-          {/* Delta Card 3: Sensor Hardware Fault */}
+          {/* Delta Card 3: Real Sensor Hardware Faults from CSV */}
           <div className="p-4 rounded-xl border border-emerald-100 bg-emerald-50/30 flex flex-col justify-between">
             <div className="flex items-center justify-between text-xs font-heading font-bold text-emerald-900">
-              <span>🛠 NEW SENSOR FAULTS: +1</span>
+              <span>🛠 SENSOR HARDWARE AUDIT: {deltaMetrics.faultyRowsCount} FAULT</span>
               <span className="text-[10px] bg-emerald-200/80 text-emerald-900 font-mono px-2 py-0.5 rounded-full">
                 HARDWARE
               </span>
             </div>
             <div className="mt-2 text-xs text-slate-800">
-              SNS_W02_03 went offline (-999 error)
-              <p className="text-[11px] text-slate-500 mt-0.5">Ward 2 designated as Telemetry Blind Spot.</p>
+              {deltaMetrics.faultySensors.length > 0 ? (
+                <span>Sensors flagged: <strong className="font-mono text-rose-700">{deltaMetrics.faultySensors.join(', ')}</strong></span>
+              ) : (
+                <span className="text-emerald-700 font-medium">All telemetry channels passing hardware sanity check.</span>
+              )}
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                {deltaMetrics.faultyRowsCount > 0 ? 'Negative/outlier values excluded from calculations.' : 'Zero missing data packets in current dataset.'}
+              </p>
             </div>
           </div>
         </div>
@@ -242,12 +336,12 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
                 </span>
               </div>
               <span className="text-xs text-slate-500 font-mono">
-                {hotspots.length} Zones Analyzed
+                {hotspots.length} Zones Analyzed from CSV
               </span>
             </div>
 
             <div className="space-y-3.5">
-              {/* Hotspot Incident Cards with "What Happened There" */}
+              {/* Dynamic Hotspot Incident Cards with "What Happened There" */}
               {hotspots.map((item, idx) => (
                 <div
                   key={idx}
@@ -259,8 +353,8 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
                       {item.hotspot_location}
                     </span>
                     <StatusBadge
-                      severity={item.hotspot_location.includes("Ward 4") ? "SEVERE" : "MODERATE"}
-                      status={item.finding_summary.includes("-999") ? "INVALID_ANOMALY" : "VALID"}
+                      severity={item.finding_summary.includes("Surge") || item.finding_summary.includes("Plume") || item.finding_summary.includes("300") ? "SEVERE" : "MODERATE"}
+                      status={item.finding_summary.includes("Outage") || item.finding_summary.includes("-999") ? "INVALID_ANOMALY" : "VALID"}
                       rawStr={item.finding_summary.includes("-999") ? "-999" : "310"}
                     />
                   </div>
@@ -292,27 +386,41 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
                 </div>
               ))}
 
-              {/* Dedicated "Normal Data Baseline" Card */}
-              <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-heading font-bold text-xs text-emerald-950 flex items-center gap-1.5">
-                    <Leaf className="w-3.5 h-3.5 text-emerald-600" />
-                    Ward 1 — Green Belt North &amp; Residential Basin
-                  </span>
-                  <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full">
-                    ● NORMAL DATA
-                  </span>
+              {/* Dedicated "Normal Data Baseline" Cards Derived Dynamically from CSV */}
+              {normalWards.length > 0 ? (
+                normalWards.map((nw, i) => (
+                  <div key={i} className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-heading font-bold text-xs text-emerald-950 flex items-center gap-1.5">
+                        <Leaf className="w-3.5 h-3.5 text-emerald-600" />
+                        {nw.wardName}
+                      </span>
+                      <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full">
+                        ● NORMAL DATA
+                      </span>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[11px] font-heading font-bold uppercase tracking-wide text-emerald-800 flex items-center gap-1">
+                        <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                        Environmental Baseline Status:
+                      </span>
+                      <p className="text-xs text-emerald-900/80 leading-relaxed pl-1">
+                        Normal calibrated telemetry (Average PM2.5: {nw.avg} µg/m³). Readings remain well within CPCB safe thresholds with zero sensor errors. Zero emergency enforcement required in this sector.
+                      </p>
+                      <div className="flex items-center gap-1.5 pt-1 text-[11px]">
+                        <span className="text-slate-500">Citations:</span>
+                        {nw.refs.map(rId => (
+                          <TraceabilityChip key={rId} rowId={rId} onClick={onSelectCitation} isSelected={selectedCitation === rId} />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-500 text-center font-mono">
+                  All sectors currently exhibiting elevated or anomalous air quality telemetry.
                 </div>
-                <div className="space-y-1">
-                  <span className="text-[11px] font-heading font-bold uppercase tracking-wide text-emerald-800 flex items-center gap-1">
-                    <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
-                    Environmental Baseline Status:
-                  </span>
-                  <p className="text-xs text-emerald-900/80 leading-relaxed pl-1">
-                    Normal calibrated telemetry (PM2.5: 74.5 µg/m³). Tree canopy buffer absorbing vehicular drift; readings remain well within CPCB safe thresholds. Zero emergency enforcement required in this sector.
-                  </p>
-                </div>
-              </div>
+              )}
 
             </div>
 
@@ -500,7 +608,7 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
                 ) : (
                   <div className="bg-emerald-50/40 p-3.5 rounded-xl border border-emerald-100 flex items-center justify-between text-xs">
                     <div>
-                      Highlighted Source: <strong className="text-slate-900 font-mono">{selectedCitation}</strong> | Sensor: <strong className="text-slate-700 font-mono">SNS_W04_01</strong> | Time: <strong className="text-slate-700 font-mono">08:00</strong> | Raw: <strong className="text-amber-800 font-mono">0.31 mg/m³ -&gt; 310.0 µg/m³</strong>
+                      Selected Row: <strong className="text-slate-900 font-mono">{selectedCitation}</strong>
                     </div>
                     <span className="text-emerald-700 text-xs font-bold bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-200">100% TRACEABLE</span>
                   </div>

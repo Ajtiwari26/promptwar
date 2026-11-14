@@ -158,7 +158,7 @@ STRICT GROUNDING & CITATION RULES:
  * Generates an uncompromising 100% schema-compliant grounded briefing
  * directly from the deterministic decision engine output.
  */
-function generateDeterministicGroundedBrief(
+export function generateDeterministicGroundedBrief(
   decisionContext: DecisionEngineOutput,
   previousBrief?: CivicBriefingOutput | null
 ): CivicBriefingOutput {

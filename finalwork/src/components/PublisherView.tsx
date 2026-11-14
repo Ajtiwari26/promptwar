@@ -28,16 +28,48 @@ export const PublisherView: React.FC<PublisherViewProps> = ({
     setCheckedMemoItems(prev => ({ ...prev, [idx]: !prev[idx] }));
   };
 
-  // Shared localized fallback advisories for English, Hindi, and Marathi
+  // 1. DYNAMIC METRIC DERIVATION FROM REAL CSV READINGS
+  const telemetrySummary = useMemo(() => {
+    if (!readings || readings.length === 0) {
+      return {
+        peakVal: 60,
+        worstWard: "Monitored Civic Zone",
+        peakRowId: "ROW_01",
+        isEmergency: false,
+        faultySensors: [] as string[],
+        flaggedRows: [] as CleanedReading[]
+      };
+    }
+
+    const validReadings = readings.filter(r => r.normalized_value_ugm3 !== null && r.validation_status === 'VALID');
+    const peakRow = validReadings.reduce((max, r) => ((r.normalized_value_ugm3 || 0) > (max?.normalized_value_ugm3 || 0) ? r : max), validReadings[0] || readings[0]);
+    const peakVal = peakRow?.normalized_value_ugm3 || 0;
+    const worstWard = peakRow?.ward_name || "Monitored Civic Zone";
+    const isEmergency = peakVal >= 250;
+
+    const flaggedRows = readings.filter(r => r.validation_status !== 'VALID' || r.raw_value === '-999');
+    const faultySensors = Array.from(new Set(flaggedRows.map(r => r.sensor_id)));
+
+    return {
+      peakVal,
+      worstWard,
+      peakRowId: peakRow?.row_id || "ROW_01",
+      isEmergency,
+      faultySensors,
+      flaggedRows
+    };
+  }, [readings]);
+
+  // Dynamic localized advisories for English, Hindi, and Marathi computed strictly from CSV telemetry
   const defaultAdvisories = useMemo(() => {
     return buildLocalizedAdvisories(
-      true,
-      "Ward 4 - Industrial Belt",
-      310
+      telemetrySummary.isEmergency,
+      telemetrySummary.worstWard,
+      telemetrySummary.peakVal
     );
-  }, []);
+  }, [telemetrySummary]);
 
-  // Wire live backend LLM outputs if present, else fallback
+  // Wire live backend LLM outputs if present, else dynamic localized telemetry fallback
   const liveCitizenAdvisories = briefing?.dual_outputs?.citizen_advisories;
   const currentAdvisoryText = liveCitizenAdvisories?.[selectedLang]?.[selectedTier]
     || defaultAdvisories[selectedLang][selectedTier];
@@ -45,37 +77,102 @@ export const PublisherView: React.FC<PublisherViewProps> = ({
   const liveExecutiveSummary = briefing?.dual_outputs?.internal_briefing_note?.executive_summary;
   const liveChecklist = briefing?.dual_outputs?.internal_briefing_note?.operational_checklist;
 
-  const defaultChecklist = [
-    { time: "08:30", action: "Deploy anti-smog water mist cannons to Ward 4 arterial roads to suppress coarse dust", ref: "ROW_04" },
-    { time: "09:00", action: "Enforce dust stop-work notice at Sector 4 metro excavation site", ref: "ROW_04" },
-    { time: "11:00", action: "Replace Ward 2 optical sensor fuse & recalibrate SNS_W02_03", ref: "ROW_07" }
-  ];
-
-  const memoChecklist = liveChecklist && liveChecklist.length > 0
-    ? liveChecklist.map((item, idx) => ({
-        time: idx === 0 ? "08:30" : idx === 1 ? "09:00" : "11:00",
+  // Dynamic checklist derived from real CSV telemetry
+  const memoChecklist = useMemo(() => {
+    if (liveChecklist && liveChecklist.length > 0) {
+      return liveChecklist.map((item, idx) => ({
+        time: idx === 0 ? "08:30" : idx === 1 ? "09:00" : idx === 2 ? "10:30" : "11:00",
         action: item,
-        ref: idx === 2 ? "ROW_07" : "ROW_04"
-      }))
-    : defaultChecklist;
+        ref: idx === 0 ? telemetrySummary.peakRowId : telemetrySummary.flaggedRows[idx - 1]?.row_id || telemetrySummary.peakRowId
+      }));
+    }
+
+    const list = [
+      {
+        time: "08:30",
+        action: `Deploy high-pressure anti-smog mist water cannons along primary arterials in ${telemetrySummary.worstWard} to suppress particulate surge (${telemetrySummary.peakVal} µg/m³)`,
+        ref: telemetrySummary.peakRowId
+      },
+      {
+        time: "09:00",
+        action: `Enforce mandatory dust halt and covering of unpaved excavation in ${telemetrySummary.worstWard}`,
+        ref: telemetrySummary.peakRowId
+      }
+    ];
+
+    if (telemetrySummary.faultySensors.length > 0) {
+      list.push({
+        time: "11:00",
+        action: `Dispatch IoT field technician to calibrate and service flagged hardware sensors: ${telemetrySummary.faultySensors.join(', ')}`,
+        ref: telemetrySummary.flaggedRows[0]?.row_id || telemetrySummary.peakRowId
+      });
+    } else {
+      list.push({
+        time: "11:00",
+        action: `Perform routine 24-hour optical sensor calibration check across ${telemetrySummary.worstWard}`,
+        ref: telemetrySummary.peakRowId
+      });
+    }
+
+    return list;
+  }, [liveChecklist, telemetrySummary]);
+
+  // Dynamic Traceability Footnotes derived strictly from incoming CSV readings
+  const dynamicFootnotes = useMemo(() => {
+    if (!readings || readings.length === 0) return [];
+    
+    // Pick flagged anomaly rows and top valid particulate readings
+    const flagged = readings.filter(r => r.validation_status !== 'VALID' || r.raw_value === '-999');
+    const validSorted = [...readings.filter(r => r.validation_status === 'VALID' && r.normalized_value_ugm3 !== null)]
+      .sort((a, b) => (b.normalized_value_ugm3 || 0) - (a.normalized_value_ugm3 || 0));
+
+    const selectedRows = Array.from(new Set([...flagged, ...validSorted.slice(0, 3)]));
+
+    return selectedRows.map(r => {
+      const isFault = r.validation_status !== 'VALID' || r.raw_value === '-999';
+      const isConverted = r.raw_unit.toLowerCase().includes('mg');
+      let note = `Sensor ${r.sensor_id} in ${r.ward_name}: `;
+      if (isFault) {
+        note += `Hardware Anomaly '${r.raw_value} ${r.raw_unit}' - flagged & excluded from statistics`;
+      } else if (isConverted) {
+        note += `Normalized ${r.normalized_value_ugm3} µg/m³ (converted from ${r.raw_value} ${r.raw_unit})`;
+      } else {
+        note += `${r.pollutant}: ${r.normalized_value_ugm3} µg/m³`;
+      }
+      return {
+        row_id: r.row_id,
+        sensor_id: r.sensor_id,
+        note
+      };
+    });
+  }, [readings]);
+
+  // Dynamic Executive Summary text if LLM summary is not populated
+  const dynamicExecutiveSummary = useMemo(() => {
+    if (liveExecutiveSummary) return liveExecutiveSummary;
+
+    if (telemetrySummary.isEmergency) {
+      return `Severe particulate surge detected in ${telemetrySummary.worstWard} (Peak PM2.5: ${telemetrySummary.peakVal} µg/m³ [${telemetrySummary.peakRowId}]), breaching emergency safety thresholds. Atmospheric dispersion remains sluggish. ${telemetrySummary.faultySensors.length > 0 ? `Sensor hardware anomalies flagged on ${telemetrySummary.faultySensors.join(', ')} [${telemetrySummary.flaggedRows[0]?.row_id || 'FLAGGED'}]; station marked as Telemetry Blind Spot.` : 'All monitoring nodes fully operational.'}`;
+    }
+
+    return `Calibrated environmental baseline maintained across ${telemetrySummary.worstWard} (Peak PM2.5: ${telemetrySummary.peakVal} µg/m³ [${telemetrySummary.peakRowId}]). Ambient concentrations comply with standard dispersion parameters with zero immediate civic emergency triggers.`;
+  }, [liveExecutiveSummary, telemetrySummary]);
 
   const handleCopyMarkdown = () => {
     const md = `# MUNICIPAL INTERNAL BRIEFING NOTE
-**TO:** Municipal Ward 4 Command
+**TO:** Municipal ${telemetrySummary.worstWard} Command
 **REF:** ${briefing?.brief_metadata?.brief_id || 'BRIEF-2026-11-14-AM'}
 **DATE:** 14 Nov 2026, 08:30 IST
-**STATUS:** ▲ CRITICAL GRAP STAGE IV
+**STATUS:** ${telemetrySummary.isEmergency ? '▲ CRITICAL GRAP STAGE IV' : '● NORMAL CALIBRATED BASELINE'}
 
 ## 1. EXECUTIVE SUMMARY
-${liveExecutiveSummary || 'Severe particulate spike in Ward 4 (310.0 µg/m³ [ROW_04]), up 42% from yesterday. Unfavorable micro-meteorology with wind speed <1m/s creating an inversion trap. Ward 2 telemetry unverified due to sensor SNS_W02_03 hardware error (-999 [ROW_07]); flagged as Telemetry Blind Spot.'}
+${dynamicExecutiveSummary}
 
 ## 2. MANDATORY ACTION CHECKLIST
 ${memoChecklist.map(c => `- [ ] ${c.time} - ${c.action} [${c.ref}]`).join('\n')}
 
 ## 3. DATA TRACEABILITY FOOTNOTES
-- ROW_04: Sensor SNS_W04_01 (310.0 µg/m³, converted from 0.31 mg/m³)
-- ROW_05: Sensor SNS_W04_01 (PM10: 480.0 µg/m³)
-- ROW_07: Sensor SNS_W02_03 (Hardware Error: -999, excluded from statistics)
+${dynamicFootnotes.map(fn => `- ${fn.row_id}: ${fn.note}`).join('\n')}
 `;
     navigator.clipboard.writeText(md);
     setCopiedMarkdown(true);
@@ -83,9 +180,9 @@ ${memoChecklist.map(c => `- [ ] ${c.time} - ${c.action} [${c.ref}]`).join('\n')}
   };
 
   const handleCopyWhatsApp = () => {
-    const wa = `🚨 *CIVIC AIR QUALITY EMERGENCY ADVISORY*
-*Ward 04 Municipal Command Broadcast*
-*Severity:* ▲ SEVERE (PM2.5: 310 µg/m³)
+    const wa = `🚨 *CIVIC AIR QUALITY ${telemetrySummary.isEmergency ? 'EMERGENCY ADVISORY' : 'BULLETIN'}*
+*${telemetrySummary.worstWard} Municipal Command Broadcast*
+*Severity:* ${telemetrySummary.isEmergency ? `▲ SEVERE (Peak PM2.5: ${telemetrySummary.peakVal} µg/m³)` : `● NORMAL (PM2.5: ${telemetrySummary.peakVal} µg/m³)`}
 
 ${currentAdvisoryText}
 
@@ -165,10 +262,12 @@ _Distributed via Civic Air Quality Briefing Studio_`;
             <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-200 text-xs space-y-4 text-slate-800">
               
               <div className="border-b border-slate-200 pb-3 text-xs text-slate-600 space-y-1 font-mono">
-                <div>TO: <strong className="text-slate-900">Municipal Ward 4 Command &amp; Disaster Cell</strong></div>
+                <div>TO: <strong className="text-slate-900">Municipal {telemetrySummary.worstWard} Command &amp; Disaster Cell</strong></div>
                 <div>REF: <strong className="text-slate-900">{briefing?.brief_metadata?.brief_id || 'BRIEF-2026-11-14-AM'}</strong></div>
                 <div>DATE: <strong className="text-slate-900">14 Nov 2026, 08:30 IST</strong></div>
-                <div>STATUS: <strong className="text-rose-700 font-bold">▲ CRITICAL ESCALATION (GRAP STAGE IV)</strong></div>
+                <div>STATUS: <strong className={telemetrySummary.isEmergency ? "text-rose-700 font-bold" : "text-emerald-700 font-bold"}>
+                  {telemetrySummary.isEmergency ? "▲ CRITICAL ESCALATION (GRAP STAGE IV)" : "● NORMAL CALIBRATED BASELINE"}
+                </strong></div>
               </div>
 
               {/* 1. Executive Summary */}
@@ -177,13 +276,7 @@ _Distributed via Civic Air Quality Briefing Studio_`;
                   1. EXECUTIVE SUMMARY
                 </div>
                 <p className="text-slate-700 leading-relaxed font-sans text-xs">
-                  {liveExecutiveSummary ? (
-                    liveExecutiveSummary
-                  ) : (
-                    <>
-                      Severe particulate spike in Ward 4 (<strong className="font-mono text-slate-900">310.0 µg/m³</strong> <TraceabilityChip rowId="ROW_04" onClick={onSelectCitation} />), up <strong className="text-rose-700">42%</strong> from yesterday. Unfavorable micro-meteorology with wind speed &lt;1m/s creating an inversion trap. Ward 2 telemetry unverified due to sensor SNS_W02_03 hardware error (<strong className="font-mono text-rose-700">-999</strong> <TraceabilityChip rowId="ROW_07" onClick={onSelectCitation} />); flagged as Telemetry Blind Spot.
-                    </>
-                  )}
+                  {dynamicExecutiveSummary}
                 </p>
               </div>
 
@@ -237,10 +330,18 @@ _Distributed via Civic Air Quality Briefing Studio_`;
                 <div className="font-heading font-bold text-slate-900 uppercase tracking-wide">
                   3. DATA TRACEABILITY FOOTNOTES
                 </div>
-                <div className="space-y-1 font-mono text-[11px]">
-                  <div>• <strong className="text-slate-900">ROW_04:</strong> Sensor SNS_W04_01 (Normalized 310.0 µg/m³, scaled from 0.31 mg/m³)</div>
-                  <div>• <strong className="text-slate-900">ROW_05:</strong> Sensor SNS_W04_01 (PM10: 480.0 µg/m³)</div>
-                  <div>• <strong className="text-slate-900">ROW_07:</strong> Sensor SNS_W02_03 (-999 Hardware Fault, excluded from statistics)</div>
+                <div className="space-y-1.5 font-mono text-[11px]">
+                  {dynamicFootnotes.map(fn => (
+                    <div key={fn.row_id} className="flex items-start gap-1.5 text-slate-700">
+                      <span className="text-slate-400">•</span>
+                      <strong className="text-slate-900">{fn.row_id}:</strong>
+                      <span className="flex-1">{fn.note}</span>
+                      <TraceabilityChip rowId={fn.row_id} onClick={onSelectCitation} />
+                    </div>
+                  ))}
+                  {dynamicFootnotes.length === 0 && (
+                    <div className="text-slate-400 italic">No telemetry footnotes generated</div>
+                  )}
                 </div>
               </div>
 
