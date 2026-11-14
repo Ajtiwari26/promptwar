@@ -4,7 +4,12 @@
   "description": "Civic Air Quality Briefing Studio - Deterministic Decision Engine & Gemini 3.8 Flash Pipeline",
   "type": "module",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "tsx server/index.ts",
     "test": "tsx testscript/run_all_tests.ts",
+    "evaluate": "tsx testscript/evaluate_parameters.ts",
     "test:units": "tsx testscript/test_unit_converter.ts",
     "test:engine": "tsx testscript/test_decision_engine.ts",
     "test:presets": "tsx testscript/test_presets_pipeline.ts",
@@ -24,6 +29,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.5",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
