@@ -51,7 +51,7 @@ export const RoleSpecificActionsSchema = z.object({
   ward_officer: z.array(ActionItemSchema),
   housing_society: z.array(ActionItemSchema),
   school_principal: z.array(ActionItemSchema),
-  gig_worker: z.array(ActionItemSchema).optional()
+  gig_worker: z.array(ActionItemSchema)
 });
 
 export const LanguageAdvisorySchema = z.object({
@@ -68,7 +68,7 @@ export const DualOutputsSchema = z.object({
   citizen_advisories: z.object({
     en: LanguageAdvisorySchema,
     hi: LanguageAdvisorySchema,
-    mr: LanguageAdvisorySchema.optional()
+    mr: LanguageAdvisorySchema
   }).and(z.record(LanguageAdvisorySchema).optional())
 });
 

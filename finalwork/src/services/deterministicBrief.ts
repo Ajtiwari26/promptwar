@@ -16,7 +16,7 @@ export function formatPlainLanguageHotspot(archetype: string, triggerReason: str
     TELEMETRY_BLIND_SPOT: "Sensor Hardware Outage (Telemetry Blind Spot)"
   };
   const title = plainTitles[archetype] || archetype.replace(/_/g, " ");
-  return `${title}: ${triggerReason}`;
+  return `[${archetype}] ${title}: ${triggerReason}`;
 }
 
 /**

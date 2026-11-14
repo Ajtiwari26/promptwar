@@ -28,6 +28,8 @@ cp finalwork/tailwind.config.js "$TARGET/tailwind.config.js"
 cp finalwork/postcss.config.js "$TARGET/postcss.config.js"
 cp finalwork/index.html "$TARGET/index.html"
 cp finalwork/README.md "$TARGET/README.md"
+cp finalwork/DESIGN.md "$TARGET/DESIGN.md"
+cp finalwork/SYSTEM_DESIGN.md "$TARGET/SYSTEM_DESIGN.md"
 cp finalwork/dev.ts "$TARGET/dev.ts"
 cp finalwork/.env.example "$TARGET/.env.example"
 

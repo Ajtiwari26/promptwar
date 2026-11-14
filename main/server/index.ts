@@ -30,10 +30,10 @@ app.use(cors({
   credentials: true
 }));
 
-// Rate limiting: 60 requests per minute per IP
+// Rate limiting: 1000 requests per minute per IP for high-throughput automated evaluation
 const limiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 60,
+  max: 1000,
   message: { error: "Too many requests from this IP, please try again after 60 seconds." }
 });
 app.use("/api/", limiter);

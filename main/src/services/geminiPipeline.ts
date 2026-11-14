@@ -5,6 +5,9 @@ import { normalizeAndClassifyHotspots } from "./fastDecisionEngine.js";
 import { DecisionEngineOutput } from "../types/decisionEngine.js";
 import { parseUniversalTelemetry } from "./universalDataParser.js";
 import { buildLocalizedAdvisories } from "../i18n/advisories.js";
+import { generateDeterministicGroundedBrief, formatPlainLanguageHotspot } from "./deterministicBrief.js";
+
+export { generateDeterministicGroundedBrief, formatPlainLanguageHotspot };
 
 export interface PipelineInput {
   text?: string;
@@ -34,19 +37,15 @@ export async function runCivicBriefingPipeline(
 
   let rawRows: RawRow[] = [];
 
-  // STAGE 1: Multimodal Extraction & Schema Mapping
+  // STAGE 1: Multimodal Extraction & Universal Telemetry Normalization
   if (preparsedRows && preparsedRows.length > 0) {
-    // Optimization: Skip extraction call if already structured (e.g. from preset)
     rawRows = preparsedRows;
-  } else if (input.text) {
-    // 1A. Deterministic Universal Parser (handles messy CSV, TSV, XML, JSON, WhatsApp logs instantly)
-    const localParsed = parseUniversalTelemetry(input.text);
-    if (localParsed.length > 0) {
-      rawRows = localParsed;
-    }
+  } else if (input.text && input.text.trim().length > 0) {
+    // 1A. Deterministic Universal Parser (preserves timestamp_raw, wind_speed_ms, relative_humidity_pct)
+    rawRows = parseUniversalTelemetry(input.text);
   }
 
-  // 1B. If rawRows still empty and inlineData (PDF/Image) or complex unstructured text is provided
+  // 1B. If rawRows still empty and inlineData (PDF/Image) or multimodal input is provided
   if (rawRows.length === 0 && effectiveApiKey && (input.inlineData || input.text)) {
     try {
       const ai = new GoogleGenAI({ apiKey: effectiveApiKey });
@@ -65,17 +64,23 @@ export async function runCivicBriefingPipeline(
       }
 
       contents.push({
-        text: `You are an environmental data parser. Extract all air quality sensor readings into an array of RawRow objects.
-Rules:
-- Preserve raw values and units EXACTLY as shown in the source table/image.
-- Do NOT convert units.
-- Do NOT fill missing values.
-- Assign sequential row_id: ROW_01, ROW_02, etc.
-- Return ONLY valid JSON array matching the schema.`
+        text: `You are an expert environmental intelligence agent. Extract all air quality sensor readings from this input into an array of RawRow objects.
+Return ONLY a valid JSON array matching RawRowSchema:
+[{
+  "row_id": "ROW_01",
+  "ward_name": "...",
+  "sensor_id": "...",
+  "timestamp_raw": "...",
+  "pollutant": "PM2.5",
+  "raw_value": "...",
+  "raw_unit": "ug/m3",
+  "wind_speed_ms": 1.2,
+  "relative_humidity_pct": 68
+}]`
       });
 
       const extractionRes = await ai.models.generateContent({
-        model: "gemini-3.8-flash",
+        model: "gemini-2.5-flash",
         contents,
         config: {
           temperature: 0,
@@ -84,9 +89,11 @@ Rules:
       });
 
       const parsed = JSON.parse(extractionRes.text || "[]");
-      rawRows = Array.isArray(parsed) ? parsed : [];
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        rawRows = parsed;
+      }
     } catch (err) {
-      console.warn("Stage 1 Extraction failed or fell back to parser:", err);
+      console.warn("Generative AI Stage 1 extraction failed, falling back to universal parser:", err);
       rawRows = [];
     }
   }
@@ -121,7 +128,7 @@ STRICT GROUNDING & CITATION RULES:
 5. In 'dual_outputs.internal_briefing_note', provide an executive summary and operational checklist with specific ward actions.`;
 
       const synthesisRes = await ai.models.generateContent({
-        model: "gemini-3.8-flash",
+        model: "gemini-2.5-flash",
         contents: [{ text: prompt }],
         config: {
           temperature: 0.1,
@@ -151,197 +158,5 @@ STRICT GROUNDING & CITATION RULES:
     decisionContext,
     fullBrief: fallbackBrief,
     executionMode: "DETERMINISTIC_OFFLINE_SIMULATION"
-  };
-}
-
-/**
- * Generates an uncompromising 100% schema-compliant grounded briefing
- * directly from the deterministic decision engine output.
- */
-function generateDeterministicGroundedBrief(
-  decisionContext: DecisionEngineOutput,
-  previousBrief?: CivicBriefingOutput | null
-): CivicBriefingOutput {
-  const banner = decisionContext.instant_triage_banner;
-  const hotspots = decisionContext.classified_hotspots;
-  const flags = decisionContext.data_quality_flags;
-
-  // 1. Cleaned readings matching schema
-  const cleanedReadings = decisionContext.normalized_readings.map(r => ({
-    row_id: r.row_id,
-    sensor_id: r.sensor_id,
-    ward_name: r.ward_name,
-    timestamp_iso: r.timestamp_iso,
-    pollutant: r.pollutant,
-    raw_value: r.raw_value,
-    raw_unit: r.raw_unit,
-    normalized_value_ugm3: r.normalized_value_ugm3,
-    aqi_severity: r.aqi_severity,
-    validation_status: r.validation_status
-  }));
-
-  // 2. Data quality flags
-  const dataQualityFlags = flags.map(f => ({
-    row_id: f.row_id,
-    sensor_id: f.sensor_id,
-    issue_type: f.issue_type,
-    raw_evidence: f.raw_evidence,
-    explanation: f.explanation
-  }));
-
-  // 3. Hotspots & Trends with citations
-  const hotspotsAndTrends = hotspots.map(h => ({
-    hotspot_location: h.ward_name,
-    finding_summary: `[${h.archetype}] ${h.trigger_reason}`,
-    traceability_refs: h.traceability_refs
-  }));
-
-  if (hotspotsAndTrends.length === 0) {
-    hotspotsAndTrends.push({
-      hotspot_location: "All Monitored Wards",
-      finding_summary: "No acute toxic hotspots detected; ambient particulate levels remain within standard dispersion limits.",
-      traceability_refs: decisionContext.normalized_readings.slice(0, 3).map(r => r.row_id)
-    });
-  }
-
-  // 4. Comparison with Previous
-  let overallTrend: "IMPROVED" | "STABLE" | "WORSENED" | "NO_PREVIOUS_DATA" = "NO_PREVIOUS_DATA";
-  let summaryChanges = "Baseline monitoring session established. No prior briefing available for delta computation.";
-  const newFailures: string[] = flags.map(f => f.sensor_id);
-  let hotspotShifts = "Stable ambient dispersion across civic boundaries.";
-
-  if (previousBrief) {
-    const prevPeak = Math.max(...previousBrief.cleaned_readings.map(r => r.normalized_value_ugm3 || 0), 0);
-    const currPeak = banner.peak_pm25_ugm3 || 0;
-
-    if (currPeak > prevPeak * 1.1) {
-      overallTrend = "WORSENED";
-      summaryChanges = `Air quality deteriorated: Peak PM2.5 increased from ${prevPeak} ug/m3 to ${currPeak} ug/m3 (+${Math.round(((currPeak - prevPeak) / (prevPeak || 1)) * 100)}%).`;
-      hotspotShifts = `Smog plume intensified over ${banner.worst_affected_ward || 'industrial sectors'}.`;
-    } else if (currPeak < prevPeak * 0.9) {
-      overallTrend = "IMPROVED";
-      summaryChanges = `Air quality improved: Peak PM2.5 declined from ${prevPeak} ug/m3 to ${currPeak} ug/m3 (-${Math.round(((prevPeak - currPeak) / (prevPeak || 1)) * 100)}%) following intervention measures.`;
-      hotspotShifts = "High-concentration plumes dispersed into regional atmospheric baseline.";
-    } else {
-      overallTrend = "STABLE";
-      summaryChanges = `Ambient concentrations remain stable with peak PM2.5 within 10% of prior briefing (${currPeak} ug/m3).`;
-    }
-  }
-
-  // 5. Role-Specific Actions grounded in row citations
-  const primaryRowRefs = decisionContext.normalized_readings
-    .filter(r => (r.normalized_value_ugm3 || 0) > 100 || r.validation_status !== "VALID")
-    .map(r => r.row_id);
-  const fallbackRefs = primaryRowRefs.length > 0 ? primaryRowRefs : decisionContext.normalized_readings.slice(0, 2).map(r => r.row_id);
-
-  const wardOfficerActions: Array<{ priority: "IMMEDIATE" | "HIGH" | "MEDIUM"; action: string; traceability_refs: string[] }> = [
-    {
-      priority: banner.alert_level === "EMERGENCY_CRITICAL" ? "IMMEDIATE" as const : "HIGH" as const,
-      action: banner.worst_affected_ward
-        ? `Deploy anti-smog mist water cannons along primary arterials in ${banner.worst_affected_ward} and enforce temporary halt on unpaved excavation.`
-        : "Deploy mobile water mist sprinklers to control road dust resuspension.",
-      traceability_refs: fallbackRefs
-    },
-    {
-      priority: "HIGH" as const,
-      action: "Order traffic police to reroute heavy commercial diesel transport away from residential corridors during peak commute hours.",
-      traceability_refs: fallbackRefs
-    }
-  ];
-
-  if (flags.length > 0) {
-    wardOfficerActions.push({
-      priority: "MEDIUM" as const,
-      action: `Dispatch IoT field maintenance team to calibrate and repair flagged sensors: ${Array.from(new Set(flags.map(f => f.sensor_id))).join(", ")}.`,
-      traceability_refs: flags.map(f => f.row_id)
-    });
-  }
-
-  const housingSocietyActions = [
-    {
-      priority: banner.alert_level === "EMERGENCY_CRITICAL" ? "IMMEDIATE" as const : "HIGH" as const,
-      action: "Ban routine testing of diesel power generator sets (DG sets) and switch society cleaning staff from dry brooms to wet mopping.",
-      traceability_refs: fallbackRefs
-    },
-    {
-      priority: "MEDIUM" as const,
-      action: "Activate centralized HEPA filtration in residential community clubhouses and notify residents via notice board bulletin.",
-      traceability_refs: fallbackRefs
-    }
-  ];
-
-  const schoolPrincipalActions = [
-    {
-      priority: banner.alert_level === "EMERGENCY_CRITICAL" ? "IMMEDIATE" as const : "HIGH" as const,
-      action: "Cancel morning outdoor assemblies and move all physical education classes into indoor gymnasiums or classrooms.",
-      traceability_refs: fallbackRefs
-    },
-    {
-      priority: "IMMEDIATE" as const,
-      action: "Mandate classroom window closures, instruct school buses to enforce zero-engine-idling at gates, and alert parents of students with respiratory ailments.",
-      traceability_refs: fallbackRefs
-    }
-  ];
-
-  const gigWorkerActions = [
-    {
-      priority: banner.alert_level === "EMERGENCY_CRITICAL" ? "IMMEDIATE" as const : "HIGH" as const,
-      action: `Dynamic corridor rerouting: Delivery riders and gig fleets bypass severe combustion and congestion arterials (${banner.worst_affected_ward || "Ward 4"}) during morning rush hours.`,
-      traceability_refs: fallbackRefs
-    },
-    {
-      priority: "HIGH" as const,
-      action: "Mandate 15-minute N95 respirator recovery breaks every 90 minutes; dark stores and distribution hubs provide free certified N95 masks.",
-      traceability_refs: fallbackRefs
-    },
-    {
-      priority: "MEDIUM" as const,
-      action: "Activate air-filtered hydration and resting hubs across courier delivery clusters during GRAP Stage IV emergency alerts.",
-      traceability_refs: fallbackRefs
-    }
-  ];
-
-  // 6. Multi-Lingual Citizen Advisories across 3 Reading Tiers (English, Hindi, Marathi)
-  const isEmergency = banner.alert_level === "EMERGENCY_CRITICAL" || banner.alert_level === "WARNING";
-
-  const citizenAdvisories = buildLocalizedAdvisories(
-    isEmergency,
-    banner.worst_affected_ward,
-    banner.peak_pm25_ugm3
-  );
-
-  return {
-    brief_metadata: {
-      brief_id: `BRIEF-${new Date().toISOString().slice(0, 10)}-${Math.floor(Math.random() * 900 + 100)}`,
-      generated_at: new Date().toISOString(),
-      compared_with_brief_id: previousBrief ? previousBrief.brief_metadata.brief_id : null
-    },
-    cleaned_readings: cleanedReadings,
-    data_quality_flags: dataQualityFlags,
-    hotspots_and_trends: hotspotsAndTrends,
-    comparison_with_previous: {
-      overall_trend: overallTrend,
-      summary_of_changes: summaryChanges,
-      new_sensor_failures: newFailures,
-      hotspot_shifts: hotspotShifts
-    },
-    role_specific_actions: {
-      ward_officer: wardOfficerActions,
-      housing_society: housingSocietyActions,
-      school_principal: schoolPrincipalActions,
-      gig_worker: gigWorkerActions
-    },
-    dual_outputs: {
-      internal_briefing_note: {
-        executive_summary: banner.primary_headline,
-        operational_checklist: [
-          ...wardOfficerActions.map(a => a.action),
-          ...housingSocietyActions.slice(0, 1).map(a => a.action),
-          ...schoolPrincipalActions.slice(0, 1).map(a => a.action),
-          ...gigWorkerActions.slice(0, 1).map(a => a.action)
-        ]
-      },
-      citizen_advisories: citizenAdvisories
-    }
   };
 }

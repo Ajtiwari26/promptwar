@@ -37,12 +37,16 @@ export async function runCivicBriefingPipeline(
 
   let rawRows: RawRow[] = [];
 
-  // STAGE 1: Generative AI Multimodal Extraction & Schema Interpretation
+  // STAGE 1: Multimodal Extraction & Universal Telemetry Normalization
   if (preparsedRows && preparsedRows.length > 0) {
-    // Optimization: Skip extraction call if already structured (e.g. from preset)
     rawRows = preparsedRows;
-  } else if (effectiveApiKey && (input.inlineData || input.text)) {
-    // Leverage Generative AI as core component to interpret messy tables, inconsistent formats, and missing readings
+  } else if (input.text && input.text.trim().length > 0) {
+    // 1A. Deterministic Universal Parser (preserves timestamp_raw, wind_speed_ms, relative_humidity_pct)
+    rawRows = parseUniversalTelemetry(input.text);
+  }
+
+  // 1B. If rawRows still empty and inlineData (PDF/Image) or multimodal input is provided
+  if (rawRows.length === 0 && effectiveApiKey && (input.inlineData || input.text)) {
     try {
       const ai = new GoogleGenAI({ apiKey: effectiveApiKey });
 
@@ -60,18 +64,23 @@ export async function runCivicBriefingPipeline(
       }
 
       contents.push({
-        text: `You are an expert environmental intelligence agent. Interpret and extract all air quality sensor readings from this raw or messy data table into an array of RawRow objects.
-Rules:
-- Robustly interpret inconsistent formats, irregular units (e.g. mg/m3, ug/m3, ppm), header comments, or missing/fault readings.
-- Preserve raw values and units EXACTLY as reported in the source table/document.
-- Do NOT convert units.
-- Do NOT fill missing values.
-- Assign sequential row_id: ROW_01, ROW_02, etc.
-- Return ONLY valid JSON array matching the schema: [{ "row_id": "ROW_01", "ward_name": "...", "sensor_id": "...", "timestamp_iso": "...", "pollutant": "...", "raw_value": "...", "raw_unit": "..." }]`
+        text: `You are an expert environmental intelligence agent. Extract all air quality sensor readings from this input into an array of RawRow objects.
+Return ONLY a valid JSON array matching RawRowSchema:
+[{
+  "row_id": "ROW_01",
+  "ward_name": "...",
+  "sensor_id": "...",
+  "timestamp_raw": "...",
+  "pollutant": "PM2.5",
+  "raw_value": "...",
+  "raw_unit": "ug/m3",
+  "wind_speed_ms": 1.2,
+  "relative_humidity_pct": 68
+}]`
       });
 
       const extractionRes = await ai.models.generateContent({
-        model: "gemini-3.8-flash",
+        model: "gemini-2.5-flash",
         contents,
         config: {
           temperature: 0,
@@ -86,14 +95,6 @@ Rules:
     } catch (err) {
       console.warn("Generative AI Stage 1 extraction failed, falling back to universal parser:", err);
       rawRows = [];
-    }
-  }
-
-  // Resilient fallback to deterministic universal parser if rawRows is still empty
-  if (rawRows.length === 0 && input.text) {
-    const localParsed = parseUniversalTelemetry(input.text);
-    if (localParsed.length > 0) {
-      rawRows = localParsed;
     }
   }
 
@@ -127,7 +128,7 @@ STRICT GROUNDING & CITATION RULES:
 5. In 'dual_outputs.internal_briefing_note', provide an executive summary and operational checklist with specific ward actions.`;
 
       const synthesisRes = await ai.models.generateContent({
-        model: "gemini-3.8-flash",
+        model: "gemini-2.5-flash",
         contents: [{ text: prompt }],
         config: {
           temperature: 0.1,
