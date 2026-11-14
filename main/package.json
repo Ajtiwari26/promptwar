@@ -1,0 +1,52 @@
+{
+  "name": "civic-air-quality-monolithic-studio",
+  "version": "1.0.0",
+  "description": "Civic Air Quality Briefing Studio - Unified Monolithic Architecture (React 19 + Express 5 + Gemini 3.8 Flash)",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx dev.ts",
+    "dev:server": "tsx server/index.ts",
+    "dev:client": "vite",
+    "build": "vite build",
+    "start": "NODE_ENV=production tsx server/index.ts",
+    "preview": "vite preview",
+    "test": "tsx testscript/run_all_tests.ts",
+    "evaluate": "tsx testscript/evaluate_parameters.ts",
+    "test:units": "tsx testscript/test_unit_converter.ts",
+    "test:engine": "tsx testscript/test_decision_engine.ts",
+    "test:presets": "tsx testscript/test_presets_pipeline.ts",
+    "test:hotspots": "tsx testscript/test_hotspot_engine.ts",
+    "test:api": "tsx testscript/test_backend_api.ts",
+    "test:messy": "tsx testscript/test_real_messy_data.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@google/genai": "^3.3.0",
+    "cors": "^2.8.6",
+    "dotenv": "^16.4.7",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.4",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "lucide-react": "^1.72.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^22.13.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "autoprefixer": "^10.6.2",
+    "postcss": "^8.5.33",
+    "tailwindcss": "^4.3.5",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3",
+    "vite": "^8.3.8"
+  }
+}

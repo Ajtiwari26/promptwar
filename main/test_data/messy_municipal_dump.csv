@@ -1,0 +1,17 @@
+# MUNICIPAL CORPORATION OF DELHI - ENVIRONMENT CELL
+# DAILY AMBIENT AIR TELEMETRY REPORT - SOUTH ZONE
+# GENERATED AT: 2026-11-14 08:30 AM | SENSOR BATCH: REV_4B
+# -------------------------------------------------------------
+Ward,Station ID,Time,Pollutant,Reading,Unit,Wind Speed (m/s),Humidity (%)
+Ward 4 - Industrial,SNS_W04_01,08:00,PM2.5,0.38,mg/m3,0.7,65
+Ward 4 - Industrial,SNS_W04_01,08:00,PM10,480,ug/m3,0.7,65
+Ward 1 - Green Belt,SNS_W01_02,08:15,PM10,340,ug/m3,1.4,45
+Ward 1 - Green Belt,SNS_W01_02,08:15,PM2.5,75,ug/m3,1.4,45
+Ward 2 - Central Market,SNS_W02_01,08:20,NO2,0.065,ppm,1.1,58
+Ward 2 - Central Market,SNS_W02_03,08:20,PM10,-999,ug/m3,1.1,58
+Ward 3 - Valley Residential,SNS_W03_01,08:25,PM2.5,195,ug/m3,0.5,78
+Ward 3 - Valley Residential,SNS_W03_02,08:25,PM2.5,-15.2,ug/m3,0.5,78
+Ward 2 - Central Market,SNS_W02_04,08:30,CO,2.4,mg/m3,1.1,58
+
+# END OF TELEMETRY RECORDS
+# Verified by Duty Officer: Inspector S. Sharma (Badge #4491)

@@ -1,0 +1,20 @@
+# =========================================================================
+# DELHI MUNICIPAL CORPORATION - POLLUTION TELEMETRY MONITORING CELL
+# REPORT: LIVE CONTINUOUS AMBIENT AIR QUALITY MONITORING (CAAQMS)
+# TIME OF GENERATION: 2026-11-14 08:30:00 IST | BATCH: REAL_FIELD_TEST_01
+# =========================================================================
+Ward Location,Station ID,Timestamp,Pollutant,Raw Reading,Unit,Wind Speed (m/s),Humidity (%)
+Ward 4 - Industrial Belt,SNS_W04_01,08:00,PM2.5,0.38,mg/m3,0.7,65
+Ward 4 - Industrial Belt,SNS_W04_01,08:00,PM10,460,ug/m3,0.7,65
+Ward 4 - Industrial Belt,SNS_W04_02,08:05,CO,2.8,mg/m3,0.7,65
+Ward 1 - Metro Construction Zone,SNS_W01_02,08:15,PM10,350,ug/m3,1.5,45
+Ward 1 - Metro Construction Zone,SNS_W01_02,08:15,PM2.5,72,ug/m3,1.5,45
+Ward 2 - Central Market Junction,SNS_W02_01,08:20,NO2,94.0,ug/m3,1.1,58
+Ward 2 - Central Market Junction,SNS_W02_03,08:20,PM10,-999,ug/m3,1.1,58
+Ward 3 - Valley Residential Basin,SNS_W03_01,08:25,PM2.5,190,ug/m3,0.5,82
+Ward 3 - Valley Residential Basin,SNS_W03_02,08:25,PM2.5,-15.2,ug/m3,0.5,82
+Ward 5 - Outer Ring Highway,SNS_W05_01,13:30,O3,135.0,ug/m3,1.8,40
+
+# -------------------------------------------------------------------------
+# END OF TRANSMISSION - SIGNED BY NODAL OFFICER S. K. MEHTA
+# -------------------------------------------------------------------------

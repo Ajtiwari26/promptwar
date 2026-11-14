@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CPCB_AirQualityReport generatedAt="2026-11-14T08:30:00Z">
+  <Station id="SNS_W04_01" ward="Ward 4 - Industrial Area">
+    <Record time="2026-11-14T08:00:00Z">
+      <Pollutant name="PM2.5" unit="mg/m3">0.39</Pollutant>
+      <Pollutant name="PM10" unit="ug/m3">470</Pollutant>
+      <Meteorology windSpeed="0.6" humidity="68"/>
+    </Record>
+  </Station>
+  <Station id="SNS_W01_02" ward="Ward 1 - Green Belt">
+    <Record time="2026-11-14T08:15:00Z">
+      <Pollutant name="PM10" unit="ug/m3">350</Pollutant>
+      <Pollutant name="PM2.5" unit="ug/m3">78</Pollutant>
+      <Meteorology windSpeed="1.5" humidity="42"/>
+    </Record>
+  </Station>
+  <Station id="SNS_W02_03" ward="Ward 2 - Central Market">
+    <Record time="2026-11-14T08:20:00Z">
+      <Pollutant name="PM10" unit="ug/m3">-999</Pollutant>
+      <Pollutant name="NO2" unit="ug/m3">94</Pollutant>
+    </Record>
+  </Station>
+  <Station id="SNS_W03_01" ward="Ward 3 - Valley Residential">
+    <Record time="2026-11-14T08:25:00Z">
+      <Pollutant name="PM2.5" unit="ug/m3">190</Pollutant>
+      <Meteorology windSpeed="0.4" humidity="80"/>
+    </Record>
+  </Station>
+</CPCB_AirQualityReport>

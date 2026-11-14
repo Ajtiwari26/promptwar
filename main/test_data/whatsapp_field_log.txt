@@ -1,0 +1,6 @@
+[14/11/2026, 08:05] Suresh Field Tech: Good morning sir, Ward 4 industrial sensor SNS_W04_01 showing extreme haze. PM2.5 = 0.42 mg/m3 at 08:00 AM!
+[14/11/2026, 08:08] Suresh: PM10 is also very high at 510 ug/m3. Wind is totally stagnant, around 0.6 m/s.
+[14/11/2026, 08:12] Ramesh (Ward 2 Tech): Sir sensor SNS_W02_03 at central market junction is blinking red error code -999. Optical laser not responding.
+[14/11/2026, 08:15] Ramesh: But traffic is terrible, NO2 sensor SNS_W02_01 reading 95 ug/m3 right now.
+[14/11/2026, 08:20] Anil (Ward 1): Construction site near Sector 1 gate has heavy dust. Sensor SNS_W01_02 PM10 is 380 ug/m3, PM2.5 is 82 ug/m3.
+[14/11/2026, 08:25] Control Room: Ward 3 valley sensor SNS_W03_01 shows PM2.5 at 185 ug/m3 under heavy morning mist (humidity 82%). Please advise next steps.

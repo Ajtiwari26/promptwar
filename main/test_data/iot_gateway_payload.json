@@ -1,0 +1,42 @@
+{
+  "gateway_telemetry": {
+    "network_id": "IOT_GW_DELHI_SOUTH_01",
+    "timestamp_epoch": 1794634200,
+    "stations": [
+      {
+        "sensor_id": "SNS_W04_01",
+        "loc_ward": "Ward 4 - Industrial Belt",
+        "metrics": {
+          "PM2.5": { "val": "0.38", "unit": "mg/m3" },
+          "PM10": { "val": 460.0, "unit": "ug/m3" }
+        },
+        "weather": { "ws": 0.8, "rh": 65 }
+      },
+      {
+        "sensor_id": "SNS_W01_02",
+        "loc_ward": "Ward 1 - Green Belt",
+        "metrics": {
+          "PM10": { "val": 360.0, "unit": "ug/m3" },
+          "PM2.5": { "val": 75.0, "unit": "ug/m3" }
+        },
+        "weather": { "ws": 1.4, "rh": 48 }
+      },
+      {
+        "sensor_id": "SNS_W02_03",
+        "loc_ward": "Ward 2 - Central Market",
+        "metrics": {
+          "PM10": { "val": -999, "unit": "ug/m3" },
+          "NO2": { "val": 92.0, "unit": "ug/m3" }
+        }
+      },
+      {
+        "sensor_id": "SNS_W03_01",
+        "loc_ward": "Ward 3 - Valley Residential",
+        "metrics": {
+          "PM2.5": { "val": 188.0, "unit": "ug/m3" }
+        },
+        "weather": { "ws": 0.5, "rh": 79 }
+      }
+    ]
+  }
+}
