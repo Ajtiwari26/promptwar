@@ -3,6 +3,7 @@ import { RawRow, RawRowSchema } from "../types/rawRow.js";
 import { CivicBriefingOutput, CivicBriefingOutputSchema } from "../types/briefingSchema.js";
 import { normalizeAndClassifyHotspots } from "./fastDecisionEngine.js";
 import { DecisionEngineOutput } from "../types/decisionEngine.js";
+import { parseUniversalTelemetry } from "./universalDataParser.js";
 
 export interface PipelineInput {
   text?: string;
@@ -34,9 +35,18 @@ export async function runCivicBriefingPipeline(
 
   // STAGE 1: Multimodal Extraction & Schema Mapping
   if (preparsedRows && preparsedRows.length > 0) {
-    // Optimization: Skip extraction call if already structured (e.g. from preset or local parser)
+    // Optimization: Skip extraction call if already structured (e.g. from preset)
     rawRows = preparsedRows;
-  } else if (effectiveApiKey) {
+  } else if (input.text) {
+    // 1A. Deterministic Universal Parser (handles messy CSV, TSV, XML, JSON, WhatsApp logs instantly)
+    const localParsed = parseUniversalTelemetry(input.text);
+    if (localParsed.length > 0) {
+      rawRows = localParsed;
+    }
+  }
+
+  // 1B. If rawRows still empty and inlineData (PDF/Image) or complex unstructured text is provided
+  if (rawRows.length === 0 && effectiveApiKey && (input.inlineData || input.text)) {
     try {
       const ai = new GoogleGenAI({ apiKey: effectiveApiKey });
 

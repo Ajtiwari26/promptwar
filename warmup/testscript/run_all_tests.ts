@@ -8,7 +8,8 @@ const suites = [
   { name: "Unit Converter & Physical Math", cmd: "npx tsx testscript/test_unit_converter.ts" },
   { name: "Fast Decision Engine & 6 Hotspot Archetypes", cmd: "npx tsx testscript/test_decision_engine.ts" },
   { name: "3-Day Lifecycle & Presets Pipeline", cmd: "npx tsx testscript/test_presets_pipeline.ts" },
-  { name: "Backend REST API, Security Middleware & LRU Cache", cmd: "npx tsx testscript/test_backend_api.ts" }
+  { name: "Backend REST API, Security Middleware & LRU Cache", cmd: "npx tsx testscript/test_backend_api.ts" },
+  { name: "Real-World Messy Data Benchmark (CSV, XML, JSON, WhatsApp)", cmd: "npx tsx testscript/test_real_messy_data.ts" }
 ];
 
 let allPassed = true;
