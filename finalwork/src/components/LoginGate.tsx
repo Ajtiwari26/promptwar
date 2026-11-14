@@ -85,230 +85,231 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col justify-between overflow-hidden bg-slate-950 font-sans selection:bg-slate-700">
+    <div className="relative min-h-screen w-full flex flex-col justify-between overflow-hidden bg-slate-50 font-sans selection:bg-blue-100 selection:text-blue-900">
       
-      {/* ATMOSPHERIC AIR POLLUTION & SMOG BACKGROUND WITH SILHOUETTES */}
+      {/* Subtle Civic Ambient Pattern */}
       <div 
-        className="absolute inset-0 pointer-events-none z-0 bg-cover bg-center opacity-85"
+        className="absolute inset-0 pointer-events-none z-0 opacity-40"
         style={{
-          backgroundImage: `
-            radial-gradient(circle at 50% 30%, rgba(45, 55, 72, 0.45) 0%, rgba(15, 23, 42, 0.85) 60%, rgba(9, 9, 11, 0.98) 100%),
-            url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="100%" height="100%"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="%23334155"/><stop offset="30%" stop-color="%231e293b"/><stop offset="70%" stop-color="%230f172a"/><stop offset="100%" stop-color="%23020617"/></linearGradient><linearGradient id="smog" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="%2364748b" stop-opacity="0.35"/><stop offset="100%" stop-color="%2309090b" stop-opacity="0.95"/></linearGradient></defs><rect width="1600" height="900" fill="url(%23sky)"/><path d="M0 350 Q 400 320 800 360 T 1600 340 L 1600 900 L 0 900 Z" fill="%231e293b" opacity="0.6"/><path d="M0 450 Q 300 410 700 460 T 1600 430 L 1600 900 L 0 900 Z" fill="%230f172a" opacity="0.8"/><circle cx="280" cy="520" r="160" fill="%23090d16"/><circle cx="440" cy="480" r="210" fill="%23090d16"/><circle cx="600" cy="530" r="170" fill="%23090d16"/><rect x="420" y="580" width="40" height="220" fill="%2306080e"/><circle cx="1180" cy="500" r="190" fill="%23090d16"/><circle cx="1340" cy="460" r="230" fill="%23090d16"/><circle cx="1500" cy="520" r="170" fill="%23090d16"/><rect width="1600" height="900" fill="url(%23smog)"/></svg>')
-          `
+          backgroundImage: `radial-gradient(#CBD5E1 1px, transparent 1px)`,
+          backgroundSize: '24px 24px'
         }}
       />
 
-      {/* Top Header Branding Bar */}
-      <header className="relative z-10 px-6 py-4 flex items-center justify-between">
+      {/* Top Civic Institutional Header */}
+      <header className="relative z-10 w-full px-6 py-4 flex items-center justify-between border-b border-slate-200/80 bg-white/80 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-lg">
-            <Wind className="w-4 h-4 text-emerald-400" />
+          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-heading font-black shadow-xs">
+            C
           </div>
           <div>
-            <div className="font-bold text-sm tracking-tight text-white flex items-center gap-2">
-              <span>CIVIC AIR QUALITY BRIEFING STUDIO</span>
-              <span className="text-[10px] font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded">
-                PromptWars
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400 font-mono">Google for Developers • Build with AI</p>
+            <span className="font-heading font-extrabold text-sm text-slate-900 tracking-tight">
+              CIVIC AIR QUALITY BRIEFING STUDIO
+            </span>
+            <span className="hidden sm:inline-block ml-2 text-[10px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded">
+              Institutional Gateway
+            </span>
           </div>
         </div>
 
-        <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-slate-400">
-          <span className="px-2 py-0.5 rounded-full bg-slate-900/60 border border-white/10 backdrop-blur-sm">
-            Node: Ward 04 Delhi / NCR
-          </span>
+        <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
+          <Wind className="w-3.5 h-3.5 text-slate-400" />
+          <span>Delhi NCR Air Surveillance Node</span>
         </div>
       </header>
 
-      {/* CENTERED GLASSMORPHIC LOGIN CARD */}
-      <main className="relative z-10 flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-sm">
+      {/* Center Modern Authentication Card */}
+      <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl p-7 sm:p-8 shadow-xl shadow-slate-200/50 space-y-6">
           
-          {/* Glass Card Container */}
-          <div className="relative backdrop-blur-2xl bg-slate-900/40 border border-white/15 rounded-3xl p-7 shadow-2xl shadow-black/80 space-y-5">
-            
-            {/* Top Pill Tab Header */}
-            <div className="flex justify-center -mt-11">
-              <div className="px-6 py-2 rounded-2xl bg-slate-200/90 text-slate-950 font-bold text-sm tracking-wide shadow-lg border border-white/30 backdrop-blur-md flex items-center gap-2">
-                <span>Login</span>
-              </div>
+          <div className="text-center space-y-1.5">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-semibold">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Municipal Command Security</span>
             </div>
+            <h1 className="text-xl sm:text-2xl font-heading font-extrabold text-slate-900 tracking-tight">
+              Sign In to Civic Studio
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500">
+              Access real-time telemetry audit, hotspot triage, and multilingual advisories
+            </p>
+          </div>
 
-            <div className="text-center pt-2">
-              <h1 className="text-base font-bold text-white tracking-tight">Municipal Command Gateway</h1>
-              <p className="text-xs text-slate-400 font-sans mt-0.5">Authorized Civic &amp; Emergency Personnel</p>
+          {error && (
+            <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>{error}</span>
             </div>
+          )}
 
-            {error && (
-              <div className="p-2.5 rounded-xl bg-red-950/70 border border-red-500/50 flex items-center gap-2 text-xs text-red-200 font-sans" role="alert">
-                <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
-                <span>{error}</span>
-              </div>
-            )}
-
-            <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password, selectedRole); }} className="space-y-4">
-              
-              {/* Username / Email Pill Input */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleLogin(email, password);
+            }}
+            className="space-y-4"
+          >
+            {/* Email Field */}
+            <div className="space-y-1.5">
+              <label htmlFor="officialEmail" className="block text-xs font-semibold text-slate-700">
+                Official Email / Municipal ID
+              </label>
               <div className="relative">
-                <input
-                  id="email"
-                  name="email"
-                  autoComplete="username"
-                  aria-label="Official Email / ID"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Official Email / ID"
-                  required
-                  className="w-full pl-5 pr-11 py-3 text-xs bg-slate-950/50 border border-white/20 rounded-full text-white placeholder-slate-400 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition shadow-inner"
-                />
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                   <User className="w-4 h-4" />
                 </div>
-              </div>
-
-              {/* Password Pill Input with Visibility Toggle */}
-              <div className="relative">
                 <input
-                  id="password"
-                  name="password"
-                  autoComplete="current-password"
-                  aria-label="Password"
+                  id="officialEmail"
+                  name="officialEmail"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="officer@ward04.gov.in"
+                  className="w-full pl-9 pr-3 py-2 text-xs font-mono text-slate-900 bg-white border border-slate-300 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition"
+                />
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div className="space-y-1.5">
+              <label htmlFor="officialPassword" className="block text-xs font-semibold text-slate-700">
+                Security Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <Lock className="w-4 h-4" />
+                </div>
+                <input
+                  id="officialPassword"
+                  name="officialPassword"
                   type={showPassword ? 'text' : 'password'}
+                  required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  required
-                  className="w-full pl-5 pr-11 py-3 text-xs bg-slate-950/50 border border-white/20 rounded-full text-white placeholder-slate-400 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition shadow-inner"
+                  className="w-full pl-9 pr-10 py-2 text-xs font-mono text-slate-900 bg-white border border-slate-300 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
                   aria-label="Toggle password visibility"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-
-              {/* Operational Role Pill Bar */}
-              <div className="pt-0.5 space-y-1.5">
-                <span className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 text-center">
-                  Operational Persona:
-                </span>
-                <div className="grid grid-cols-4 gap-1.5 bg-slate-950/40 p-1 rounded-full border border-white/10">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRole('ward_officer')}
-                    className={`py-1.5 px-2 rounded-full text-[11px] font-medium transition flex items-center justify-center gap-1 ${
-                      selectedRole === 'ward_officer'
-                        ? 'bg-white text-slate-950 font-bold shadow-md'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <Landmark className="w-3 h-3" />
-                    <span>Ward</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRole('housing_society')}
-                    className={`py-1.5 px-2 rounded-full text-[11px] font-medium transition flex items-center justify-center gap-1 ${
-                      selectedRole === 'housing_society'
-                        ? 'bg-white text-slate-950 font-bold shadow-md'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <Building2 className="w-3 h-3" />
-                    <span>RWA</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRole('school_principal')}
-                    className={`py-1.5 px-2 rounded-full text-[11px] font-medium transition flex items-center justify-center gap-1 ${
-                      selectedRole === 'school_principal'
-                        ? 'bg-white text-slate-950 font-bold shadow-md'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <School className="w-3 h-3" />
-                    <span>School</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRole('gig_worker')}
-                    className={`py-1.5 px-2 rounded-full text-[11px] font-medium transition flex items-center justify-center gap-1 ${
-                      selectedRole === 'gig_worker'
-                        ? 'bg-white text-slate-950 font-bold shadow-md'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <Bike className="w-3 h-3" />
-                    <span>Gig</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Remember Me and Forgot Password */}
-              <div className="flex items-center justify-between text-[11px] text-slate-400 px-2 pt-1 font-sans">
-                <label htmlFor="rememberMe" className="flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    id="rememberMe"
-                    name="rememberMe"
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="accent-white h-3.5 w-3.5 rounded"
-                  />
-                  <span>Remember me</span>
-                </label>
-                <span className="text-slate-500 hover:text-slate-300 cursor-pointer">
-                  Forgot Password?
-                </span>
-              </div>
-
-              {/* Login Button */}
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full py-3 px-6 rounded-full bg-white text-slate-950 hover:bg-slate-200 font-bold text-xs uppercase tracking-wider transition-all duration-200 shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
-              >
-                {isLoading ? "Authenticating..." : "Login"}
-                <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
-              </button>
-            </form>
-
-            <div className="text-center pt-1 text-[11px] text-slate-400">
-              Authorized personnel node? <span className="text-white font-medium underline underline-offset-2">CPCB Registry</span>
             </div>
 
-          </div>
+            {/* Persona Selector */}
+            <div className="space-y-1.5">
+              <span className="block text-xs font-semibold text-slate-700">
+                Operational Role
+              </span>
+              <div className="grid grid-cols-4 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole('ward_officer')}
+                  className={`py-1.5 px-2 rounded-lg text-xs font-semibold border transition cursor-pointer flex flex-col items-center gap-1 ${
+                    selectedRole === 'ward_officer'
+                      ? 'bg-blue-600 border-blue-600 text-white shadow-xs'
+                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <Landmark className="w-3.5 h-3.5" />
+                  <span className="text-[10px]">Ward</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole('housing_society')}
+                  className={`py-1.5 px-2 rounded-lg text-xs font-semibold border transition cursor-pointer flex flex-col items-center gap-1 ${
+                    selectedRole === 'housing_society'
+                      ? 'bg-blue-600 border-blue-600 text-white shadow-xs'
+                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span className="text-[10px]">RWA</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole('school_principal')}
+                  className={`py-1.5 px-2 rounded-lg text-xs font-semibold border transition cursor-pointer flex flex-col items-center gap-1 ${
+                    selectedRole === 'school_principal'
+                      ? 'bg-blue-600 border-blue-600 text-white shadow-xs'
+                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <School className="w-3.5 h-3.5" />
+                  <span className="text-[10px]">School</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole('gig_worker')}
+                  className={`py-1.5 px-2 rounded-lg text-xs font-semibold border transition cursor-pointer flex flex-col items-center gap-1 ${
+                    selectedRole === 'gig_worker'
+                      ? 'bg-blue-600 border-blue-600 text-white shadow-xs'
+                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <Bike className="w-3.5 h-3.5" />
+                  <span className="text-[10px]">Gig</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Remember Me */}
+            <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
+              <label htmlFor="rememberMe" className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  id="rememberMe"
+                  name="rememberMe"
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="accent-blue-600 h-3.5 w-3.5 rounded"
+                />
+                <span>Remember me</span>
+              </label>
+              <span className="text-blue-600 hover:underline cursor-pointer">
+                Help & Access
+              </span>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-2.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs uppercase tracking-wider transition shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+            >
+              {isLoading ? 'Authenticating...' : 'Sign In to Gateway'}
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </form>
 
         </div>
       </main>
 
-      {/* BOTTOM-RIGHT PINNED EVALUATOR GUEST SANDBOX */}
+      {/* Evaluator 1-Click Sandbox Card (Fixed Bottom-Right) */}
       <aside 
-        className="fixed bottom-4 right-4 z-20 max-w-xs w-full backdrop-blur-xl bg-slate-900/80 border border-dashed border-amber-400/50 rounded-2xl p-3 shadow-2xl space-y-2"
+        className="fixed bottom-4 right-4 z-20 max-w-xs w-full bg-white border border-amber-300 rounded-xl p-3.5 shadow-xl space-y-2"
         aria-label="Guest Evaluator Sandbox"
       >
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-mono font-bold text-amber-300 flex items-center gap-1.5 uppercase">
-            <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400 shrink-0" />
+          <span className="text-xs font-heading font-bold text-amber-900 flex items-center gap-1.5">
+            <Zap className="w-3.5 h-3.5 text-amber-600 fill-amber-600 shrink-0" />
             Evaluator Guest Access
           </span>
-          <span className="text-[9px] font-mono bg-amber-500/20 text-amber-200 border border-amber-400/40 px-1.5 py-0.2 rounded-full">
+          <span className="text-[10px] font-medium bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
             1-Click Login
           </span>
         </div>
 
-        <div className="p-1.5 rounded-lg bg-slate-950/70 border border-white/10 font-mono text-[10px] text-slate-300 space-y-0.5">
-          <div className="truncate">Email: <strong className="text-white">guest.evaluator@civicstudio.in</strong></div>
-          <div>Pass: <strong className="text-white">CivicBrief#2026</strong></div>
+        <div className="p-2 rounded-md bg-amber-50/70 border border-amber-200/80 text-[11px] font-mono text-slate-700 space-y-0.5">
+          <div className="truncate">Email: <strong className="text-slate-900">guest.evaluator@civicstudio.in</strong></div>
+          <div>Pass: <strong className="text-slate-900">CivicBrief#2026</strong></div>
         </div>
 
         <div className="grid grid-cols-4 gap-1">
@@ -316,7 +317,7 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onLoginSuccess }) => {
             type="button"
             onClick={() => handleOneClick('ward_officer')}
             disabled={isLoading}
-            className="py-1 px-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-white/10 font-mono text-[10px] text-white font-bold transition text-center truncate"
+            className="py-1 px-1 rounded-md bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-800 transition text-center cursor-pointer shadow-2xs"
           >
             Ward
           </button>
@@ -325,7 +326,7 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onLoginSuccess }) => {
             type="button"
             onClick={() => handleOneClick('housing_society')}
             disabled={isLoading}
-            className="py-1 px-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-white/10 font-mono text-[10px] text-white font-bold transition text-center truncate"
+            className="py-1 px-1 rounded-md bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-800 transition text-center cursor-pointer shadow-2xs"
           >
             RWA
           </button>
@@ -334,7 +335,7 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onLoginSuccess }) => {
             type="button"
             onClick={() => handleOneClick('school_principal')}
             disabled={isLoading}
-            className="py-1 px-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-white/10 font-mono text-[10px] text-white font-bold transition text-center truncate"
+            className="py-1 px-1 rounded-md bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-800 transition text-center cursor-pointer shadow-2xs"
           >
             School
           </button>
@@ -343,18 +344,18 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onLoginSuccess }) => {
             type="button"
             onClick={() => handleOneClick('gig_worker')}
             disabled={isLoading}
-            className="py-1 px-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-white/10 font-mono text-[10px] text-white font-bold transition text-center truncate"
+            className="py-1 px-1 rounded-md bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-800 transition text-center cursor-pointer shadow-2xs"
           >
             Gig
           </button>
         </div>
       </aside>
 
-      {/* Security Footer Line */}
-      <footer className="relative z-10 py-3 px-6 text-center text-[10px] font-mono text-slate-500">
+      {/* Security Footer */}
+      <footer className="relative z-10 py-3 px-6 text-center text-xs text-slate-500 bg-white border-t border-slate-200/80">
         <div className="flex items-center justify-center gap-2">
-          <ShieldCheck className="w-3 h-3 text-slate-400" />
-          <span>JWT Session Active • Rate Limiting Enabled • Server-Side API Key Protected</span>
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+          <span>Signed JWT Session • Zero Data Hallucination • Server-Side Gemini 3.8 Flash Proxy</span>
         </div>
       </footer>
 

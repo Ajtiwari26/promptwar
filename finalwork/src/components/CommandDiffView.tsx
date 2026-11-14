@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { History, TrendingUp, TrendingDown, Minus, Wind, AlertTriangle, ShieldCheck, CheckSquare, Square, X, ChevronUp, ChevronDown, CheckCircle2, MapPin, Eye } from 'lucide-react';
+import { History, TrendingUp, TrendingDown, Minus, Wind, AlertTriangle, ShieldCheck, CheckSquare, Square, X, ChevronUp, ChevronDown, CheckCircle2, MapPin, Eye, ArrowRight } from 'lucide-react';
 import { TraceabilityChip } from './TraceabilityChip.js';
 import { StatusBadge } from './StatusBadge.js';
 import {
@@ -167,159 +167,149 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
     <div className="space-y-6 pb-24">
       
       {/* 1. TOP DELTA DIFF STRIP ("WHAT CHANGED SINCE PREVIOUS BRIEF") */}
-      <div className="p-5 rounded-xl border border-[#27272A] bg-[#18181B] shadow-md space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#27272A] pb-3">
+      <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
-            <History className="w-4 h-4 text-zinc-400" />
-            <span className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+            <History className="w-4 h-4 text-blue-600" />
+            <span className="font-heading text-xs font-bold uppercase tracking-wider text-slate-900">
               🔄 WHAT CHANGED SINCE PREVIOUS BRIEF (Compared to: BRIEF-13-NOV-AM)
             </span>
           </div>
-          <span className="text-[11px] font-mono text-zinc-400">
+          <span className="text-xs text-slate-500 font-mono">
             Automated Delta Diff Engine
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          
-          {/* Card 1: Pollution Delta */}
-          <div className="p-3.5 rounded-lg bg-[#09090B] border border-red-500/60 font-mono space-y-1">
-            <div className="text-xs font-bold text-red-400 flex items-center justify-between">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          {/* Delta Card 1: Escalation Spike */}
+          <div className="p-4 rounded-xl border border-rose-200 bg-rose-50/60 flex flex-col justify-between">
+            <div className="flex items-center justify-between text-xs font-heading font-bold text-rose-800">
               <span>▲ WARD 4 SPIKE: +42%</span>
-              <span className="text-[10px] bg-red-950 text-red-300 border border-red-800 px-1 rounded">
+              <span className="text-[10px] bg-rose-200/80 text-rose-900 font-mono px-2 py-0.5 rounded-full">
                 ESCALATION
               </span>
             </div>
-            <p className="text-xs text-zinc-200">
-              PM2.5 rose <strong className="text-white">218 -&gt; 310 µg/m³</strong>
-            </p>
-            <p className="text-[11px] text-zinc-400 font-sans">
-              Critical threshold breached at 08:00 morning peak.
-            </p>
+            <div className="mt-2 text-xs text-rose-900">
+              PM2.5 rose <strong className="font-mono text-rose-950">218 -&gt; 310 µg/m³</strong>
+              <p className="text-[11px] text-rose-700 mt-0.5">Critical threshold breached at 08:00 morning peak.</p>
+            </div>
           </div>
 
-          {/* Card 2: Wind / Plume Shift */}
-          <div className="p-3.5 rounded-lg bg-[#09090B] border border-[#27272A] font-mono space-y-1">
-            <div className="text-xs font-bold text-cyan-400 flex items-center justify-between">
+          {/* Delta Card 2: Meteorological Inversion */}
+          <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/60 flex flex-col justify-between">
+            <div className="flex items-center justify-between text-xs font-heading font-bold text-amber-800">
               <span>🌬️ PLUME SHIFT: E -&gt; W</span>
-              <span className="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-800 px-1 rounded">
+              <span className="text-[10px] bg-amber-200/80 text-amber-900 font-mono px-2 py-0.5 rounded-full">
                 WIND &lt; 1 m/s
               </span>
             </div>
-            <p className="text-xs text-zinc-200">
+            <div className="mt-2 text-xs text-amber-900">
               Smog drifted into Ward 4 arterial pocket
-            </p>
-            <p className="text-[11px] text-zinc-400 font-sans">
-              Thermal inversion trapped ground resuspension.
-            </p>
+              <p className="text-[11px] text-amber-700 mt-0.5">Thermal inversion trapped ground resuspension.</p>
+            </div>
           </div>
 
-          {/* Card 3: Telemetry Health */}
-          <div className="p-3.5 rounded-lg bg-[#09090B] border border-[#27272A] font-mono space-y-1">
-            <div className="text-xs font-bold text-amber-400 flex items-center justify-between">
+          {/* Delta Card 3: Sensor Hardware Fault */}
+          <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+            <div className="flex items-center justify-between text-xs font-heading font-bold text-slate-800">
               <span>🛠 NEW SENSOR FAULTS: +1</span>
-              <span className="text-[10px] bg-amber-950 text-amber-300 border border-amber-800 px-1 rounded">
+              <span className="text-[10px] bg-slate-200 text-slate-700 font-mono px-2 py-0.5 rounded-full">
                 HARDWARE
               </span>
             </div>
-            <p className="text-xs text-zinc-200">
+            <div className="mt-2 text-xs text-slate-800">
               SNS_W02_03 went offline (-999 error)
-            </p>
-            <p className="text-[11px] text-zinc-400 font-sans">
-              Ward 2 designated as Telemetry Blind Spot.
-            </p>
+              <p className="text-[11px] text-slate-500 mt-0.5">Ward 2 designated as Telemetry Blind Spot.</p>
+            </div>
           </div>
-
         </div>
       </div>
 
-      {/* 2. TWO-COLUMN OPERATIONAL WORKSPACE */}
+      {/* 2. MAIN TWO-COLUMN SPLIT: DETECTED HOTSPOTS vs ROLE-SPECIFIC ACTIONS */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* LEFT COLUMN: DETECTED HOTSPOTS & PLAIN SUMMARY */}
+        {/* ======================================================== */}
+        {/* LEFT COLUMN: DETECTED HOTSPOTS & PLAIN SUMMARY           */}
+        {/* ======================================================== */}
         <div className="lg:col-span-6 space-y-4">
-          <div className="p-5 rounded-xl border border-[#27272A] bg-[#18181B] space-y-4">
+          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-4">
             
-            <div className="flex items-center justify-between border-b border-[#27272A] pb-3">
-              <span className="font-mono text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-zinc-400" />
-                DETECTED HOTSPOTS & PLAIN SUMMARY
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-blue-600" />
+                <span className="font-heading text-xs font-bold uppercase tracking-wider text-slate-900">
+                  DETECTED HOTSPOTS &amp; PLAIN SUMMARY
+                </span>
+              </div>
+              <span className="text-xs text-slate-500 font-mono">
+                {hotspots.length} Zones Identified
               </span>
-              <span className="text-[10px] font-mono text-zinc-500">2 Zones Identified</span>
             </div>
 
             <div className="space-y-3">
-              {hotspots.map((h, i) => {
-                const isBlindSpot = h.hotspot_location.toLowerCase().includes('blind') || h.finding_summary.toLowerCase().includes('blind');
+              {hotspots.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-300 transition space-y-2.5"
+                >
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <span className="font-heading font-bold text-xs text-slate-900 flex items-center gap-1.5">
+                      <span className="text-blue-600">📍</span>
+                      {item.hotspot_location}
+                    </span>
+                    <StatusBadge
+                      severity={item.hotspot_location.includes("Ward 4") ? "SEVERE" : "MODERATE"}
+                      status={item.finding_summary.includes("-999") ? "INVALID_ANOMALY" : "VALID"}
+                      rawStr={item.finding_summary.includes("-999") ? "-999" : "310"}
+                    />
+                  </div>
 
-                return (
-                  <div
-                    key={i}
-                    className={`p-4 rounded-lg border font-mono transition ${
-                      isBlindSpot
-                        ? 'bg-striped-fault border-[#27272A]'
-                        : 'bg-[#09090B] border-red-500/50 hover:border-red-400'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2 font-bold text-xs text-white">
-                        <span>📍 {h.hotspot_location}</span>
-                      </div>
-                      {isBlindSpot ? (
-                        <StatusBadge status="ERR" rawStr="-999" size="sm" />
-                      ) : (
-                        <StatusBadge severity="SEVERE" value={310} size="sm" />
-                      )}
-                    </div>
+                  <p className="text-xs text-slate-700 leading-relaxed">
+                    <strong className="text-slate-900 block mb-0.5 font-heading">Plain Summary:</strong>
+                    {item.finding_summary}
+                  </p>
 
-                    <div className="text-xs font-sans text-zinc-300 leading-relaxed mb-3">
-                      <strong className="font-mono text-white block mb-1">
-                        Plain Summary:
-                      </strong>
-                      {h.finding_summary}
-                    </div>
-
-                    <div className="flex items-center gap-2 pt-2 border-t border-[#27272A] text-[11px]">
-                      <span className="text-zinc-500 font-mono">Evidence:</span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {h.traceability_refs.map((ref) => (
-                          <TraceabilityChip
-                            key={ref}
-                            rowId={ref}
-                            onClick={onSelectCitation}
-                            isSelected={selectedCitation === ref}
-                          />
-                        ))}
-                      </div>
+                  <div className="flex items-center gap-2 pt-1 border-t border-slate-200/60 text-xs">
+                    <span className="text-slate-500 text-[11px] font-semibold">Evidence:</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {item.traceability_refs.map(ref => (
+                        <TraceabilityChip
+                          key={ref}
+                          rowId={ref}
+                          onClick={onSelectCitation}
+                          isSelected={selectedCitation === ref}
+                        />
+                      ))}
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
 
           </div>
         </div>
 
-        {/* RIGHT COLUMN: ROLE-ADAPTIVE ACTION CHECKLIST */}
+        {/* ======================================================== */}
+        {/* RIGHT COLUMN: PRIORITIZED ACTIONS (PERSONA-ADAPTIVE)     */}
+        {/* ======================================================== */}
         <div className="lg:col-span-6 space-y-4">
-          <div className="p-5 rounded-xl border border-[#27272A] bg-[#18181B] space-y-4">
+          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-4">
             
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#27272A] pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 flex-wrap gap-2">
               <div>
-                <span className="font-mono text-xs font-bold uppercase tracking-wider text-white">
-                  PRIORITIZED ACTIONS FOR: [{roleTitle}]
+                <span className="font-heading text-xs font-bold uppercase tracking-wider text-slate-900 block">
+                  PRIORITIZED ACTIONS FOR: <span className="text-blue-600 font-extrabold">[{roleTitle}]</span>
                 </span>
-                <p className="text-[11px] font-mono text-zinc-400 mt-0.5">
+                <span className="text-xs text-slate-500">
                   0ms persona adaptation • Click checkboxes to track dispatch
-                </p>
+                </span>
               </div>
-
-              <span className="text-[10px] font-mono bg-zinc-800 text-zinc-300 px-2 py-0.5 rounded border border-zinc-700">
+              <span className="text-xs font-mono font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
                 {Object.values(completedActions).filter(Boolean).length} / {roleActions.length} Executed
               </span>
             </div>
 
-            <div className="space-y-3 font-mono">
+            <div className="space-y-3">
               {roleActions.map((item, idx) => {
                 const isChecked = !!completedActions[`${activeRole}_${idx}`];
                 const isImmediate = item.priority === 'IMMEDIATE';
@@ -329,49 +319,59 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
                   <div
                     key={idx}
                     onClick={() => toggleAction(idx)}
-                    className={`p-3.5 rounded-lg border transition cursor-pointer ${
+                    className={`p-4 rounded-xl border transition cursor-pointer ${
                       isChecked
-                        ? 'bg-zinc-900 border-zinc-700 opacity-60'
+                        ? 'bg-slate-50 border-slate-200 opacity-60'
                         : isImmediate
-                        ? 'bg-[#09090B] border-red-500/60 hover:border-red-400'
+                        ? 'bg-rose-50/40 border-rose-200 hover:border-rose-300'
                         : isHigh
-                        ? 'bg-[#09090B] border-amber-500/60 hover:border-amber-400'
-                        : 'bg-[#09090B] border-[#27272A] hover:border-zinc-500'
+                        ? 'bg-amber-50/40 border-amber-200 hover:border-amber-300'
+                        : 'bg-white border-slate-200 hover:border-slate-300'
                     }`}
                   >
                     <div className="flex items-start gap-3">
                       <button
                         type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleAction(idx);
+                        }}
+                        className="mt-0.5 text-slate-400 hover:text-blue-600 shrink-0 cursor-pointer"
                         aria-label={`Toggle action item ${idx + 1}`}
-                        className="mt-0.5 text-zinc-400 hover:text-white shrink-0"
                       >
                         {isChecked ? (
-                          <CheckSquare className="w-4 h-4 text-emerald-400" />
+                          <CheckSquare className="w-5 h-5 text-emerald-600" />
                         ) : (
-                          <Square className="w-4 h-4 text-zinc-500" />
+                          <Square className="w-5 h-5 text-slate-400" />
                         )}
                       </button>
 
-                      <div className="space-y-1.5 flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className={`text-xs font-bold uppercase tracking-wider ${
-                            isImmediate ? 'text-red-400' : isHigh ? 'text-amber-400' : 'text-zinc-300'
-                          }`}>
-                            {idx + 1}. [{isImmediate ? '▲ IMMEDIATE' : isHigh ? '◆ HIGH' : '● ROUTINE'}]
+                      <div className="flex-1 space-y-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs font-bold text-slate-700">
+                            {idx + 1}.
                           </span>
-                          {isChecked && (
-                            <span className="text-[10px] font-bold text-emerald-400 uppercase">
-                              COMPLETED
+                          {isImmediate ? (
+                            <span className="text-[10px] font-heading font-bold uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200 px-2 py-0.5 rounded-full">
+                              ▲ IMMEDIATE
+                            </span>
+                          ) : isHigh ? (
+                            <span className="text-[10px] font-heading font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full">
+                              ◆ HIGH
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-heading font-bold uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200 px-2 py-0.5 rounded-full">
+                              ● ROUTINE
                             </span>
                           )}
                         </div>
 
-                        <p className={`text-xs font-sans text-zinc-200 leading-snug ${isChecked ? 'line-through text-zinc-500' : ''}`}>
+                        <p className={`text-xs text-slate-800 leading-relaxed ${isChecked ? 'line-through text-slate-400' : ''}`}>
                           {item.action}
                         </p>
 
-                        <div className="flex items-center gap-2 pt-1 text-[11px]">
-                          <span className="text-zinc-500">Evidence:</span>
+                        <div className="flex items-center gap-2 pt-1 text-xs">
+                          <span className="text-slate-500 text-[11px] font-semibold">Evidence:</span>
                           <div className="flex flex-wrap gap-1.5" onClick={(e) => e.stopPropagation()}>
                             {item.traceability_refs.map(ref => (
                               <TraceabilityChip
@@ -391,13 +391,13 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
             </div>
 
             {/* Next Step Shortcut */}
-            <div className="pt-2 border-t border-[#27272A] flex justify-end">
+            <div className="pt-3 border-t border-slate-100 flex justify-end">
               <button
                 onClick={onNavigateToPublish}
-                className="text-xs font-mono text-zinc-400 hover:text-white flex items-center gap-1.5 transition"
+                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-heading font-bold uppercase tracking-wider flex items-center gap-2 transition cursor-pointer shadow-xs"
               >
                 <span>Proceed to Step 3: Publish Dual Outputs</span>
-                <span>→</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
 
@@ -409,29 +409,30 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
       {/* 3. SLIDE-UP TRACEABILITY INSPECTOR DRAWER (Pinned at Bottom) */}
       {selectedCitation && (
         <div
-          className="fixed bottom-0 left-0 right-0 z-40 bg-[#18181B] border-t-2 border-white shadow-2xl transition-transform"
+          className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t-2 border-blue-600 shadow-2xl transition-transform"
           role="region"
           aria-label="Traceability Source Inspector"
         >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
-            <div className="flex items-center justify-between border-b border-[#27272A] pb-2">
-              <div className="flex items-center gap-2 font-mono text-xs font-bold text-white">
-                <span>🔽 SLIDE-UP TRACEABILITY INSPECTOR</span>
-                <span className="text-zinc-400 font-normal">
-                  (Source row verified against sensor hardware stream)
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+              <div className="flex items-center gap-2 text-xs font-heading font-bold text-slate-900">
+                <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                <span>TRACEABILITY SOURCE EVIDENCE INSPECTOR</span>
+                <span className="text-slate-500 font-normal">
+                  (Physical row verified against sensor hardware stream)
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsInspectorExpanded(!isInspectorExpanded)}
-                  className="p-1 text-zinc-400 hover:text-white"
+                  className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
                   aria-label="Toggle inspector drawer"
                 >
                   {isInspectorExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
                 </button>
                 <button
                   onClick={() => onSelectCitation(null)}
-                  className="p-1 text-zinc-400 hover:text-white"
+                  className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
                   aria-label="Close inspector drawer"
                 >
                   <X className="w-4 h-4" />
@@ -440,38 +441,38 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
             </div>
 
             {isInspectorExpanded && (
-              <div className="pt-3 font-mono text-xs text-zinc-300">
+              <div className="pt-3 text-xs">
                 {inspectedRow ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 bg-[#09090B] p-3 rounded-lg border border-[#27272A]">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
                     <div>
-                      <span className="text-zinc-500 block text-[10px] uppercase">Row ID</span>
-                      <strong className="text-white">{inspectedRow.row_id}</strong>
+                      <span className="text-slate-500 block text-[10px] font-heading font-semibold uppercase">Row ID</span>
+                      <strong className="text-slate-900 font-mono text-sm">{inspectedRow.row_id}</strong>
                     </div>
                     <div>
-                      <span className="text-zinc-500 block text-[10px] uppercase">Sensor Hardware</span>
-                      <strong className="text-zinc-300">{inspectedRow.sensor_id}</strong>
+                      <span className="text-slate-500 block text-[10px] font-heading font-semibold uppercase">Sensor Hardware</span>
+                      <strong className="text-slate-800 font-mono text-xs">{inspectedRow.sensor_id}</strong>
                     </div>
                     <div>
-                      <span className="text-zinc-500 block text-[10px] uppercase">Ward & Pollutant</span>
-                      <strong className="text-white">{inspectedRow.ward_name} ({inspectedRow.pollutant})</strong>
+                      <span className="text-slate-500 block text-[10px] font-heading font-semibold uppercase">Ward &amp; Pollutant</span>
+                      <strong className="text-slate-900 text-xs">{inspectedRow.ward_name} ({inspectedRow.pollutant})</strong>
                     </div>
                     <div>
-                      <span className="text-zinc-500 block text-[10px] uppercase">Raw Input</span>
-                      <strong className="text-zinc-300">{inspectedRow.raw_value} {inspectedRow.raw_unit}</strong>
+                      <span className="text-slate-500 block text-[10px] font-heading font-semibold uppercase">Raw Input</span>
+                      <strong className="text-slate-700 font-mono text-xs">{inspectedRow.raw_value} {inspectedRow.raw_unit}</strong>
                     </div>
                     <div>
-                      <span className="text-zinc-500 block text-[10px] uppercase">Normalized Result</span>
-                      <strong className="text-emerald-400">
+                      <span className="text-slate-500 block text-[10px] font-heading font-semibold uppercase">Normalized Result</span>
+                      <strong className="text-emerald-700 font-mono text-xs font-bold">
                         {inspectedRow.normalized_value_ugm3 !== null ? `${inspectedRow.normalized_value_ugm3} µg/m³` : 'EXCLUDED / FAULT'}
                       </strong>
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-[#09090B] p-3 rounded-lg border border-[#27272A] flex items-center justify-between">
+                  <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
                     <div>
-                      Highlighted Source: <strong className="text-white">{selectedCitation}</strong> | Sensor: <strong className="text-zinc-300">SNS_W04_01</strong> | Time: <strong className="text-zinc-300">08:00</strong> | Raw: <strong className="text-amber-400">0.31 mg/m³ -&gt; 310.0 µg/m³</strong>
+                      Highlighted Source: <strong className="text-slate-900 font-mono">{selectedCitation}</strong> | Sensor: <strong className="text-slate-700 font-mono">SNS_W04_01</strong> | Time: <strong className="text-slate-700 font-mono">08:00</strong> | Raw: <strong className="text-amber-800 font-mono">0.31 mg/m³ -&gt; 310.0 µg/m³</strong>
                     </div>
-                    <span className="text-emerald-400 text-[11px] font-bold">100% TRACEABLE</span>
+                    <span className="text-emerald-700 text-xs font-bold bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-200">100% TRACEABLE</span>
                   </div>
                 )}
               </div>

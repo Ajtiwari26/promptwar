@@ -91,38 +91,38 @@ export const IngestAuditView: React.FC<IngestAuditViewProps> = ({
   return (
     <div className="space-y-6">
       
-      {/* 1. TOP PRESET STRIP */}
-      <div className="p-4 rounded-2xl border border-[#27272A] bg-[#18181B] shadow-md">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+      {/* 1. TOP PRESET STRIP - CRISP BRIGHT ELEVATION */}
+      <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
-            <Zap className="w-4 h-4 text-amber-400 fill-amber-400" />
-            <span className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+            <Zap className="w-4 h-4 text-amber-500 fill-amber-500" />
+            <span className="font-heading text-xs font-bold uppercase tracking-wider text-slate-900">
               QUICK DEMO PRESETS (Instant 1-Click Evaluation):
             </span>
           </div>
-          <span className="text-[11px] font-mono text-zinc-400">
+          <span className="text-xs text-slate-500">
             Click any scenario to immediately populate telemetry and audit report
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
           <button
             type="button"
             onClick={() => onSelectPreset('baseline')}
             disabled={isLoading}
-            className={`p-3.5 rounded-xl border text-left font-mono transition ${
+            className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
               activePreset === 'baseline'
-                ? 'bg-zinc-800 border-white ring-1 ring-white'
-                : 'bg-[#09090B] border-[#27272A] hover:border-zinc-500'
+                ? 'bg-emerald-50/70 border-emerald-500 ring-2 ring-emerald-200 shadow-xs'
+                : 'bg-slate-50/60 border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/30'
             }`}
           >
-            <div className="text-xs font-bold text-emerald-400 flex items-center justify-between">
+            <div className="text-xs font-heading font-bold text-emerald-800 flex items-center justify-between">
               <span>⚡ Preset 1: Baseline Day</span>
-              <span className="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 px-1.5 py-0.2 rounded">
+              <span className="text-[10px] bg-emerald-100 text-emerald-800 font-mono font-semibold px-2 py-0.5 rounded-full border border-emerald-200">
                 AQI ~85
               </span>
             </div>
-            <p className="text-[11px] text-zinc-400 font-sans mt-1">
+            <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
               Normal moderate air quality across all 4 wards. All telemetry calibrated and operational.
             </p>
           </button>
@@ -131,19 +131,19 @@ export const IngestAuditView: React.FC<IngestAuditViewProps> = ({
             type="button"
             onClick={() => onSelectPreset('crisis')}
             disabled={isLoading}
-            className={`p-3.5 rounded-xl border text-left font-mono transition ${
+            className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
               activePreset === 'crisis'
-                ? 'bg-zinc-800 border-white ring-1 ring-white'
-                : 'bg-[#09090B] border-[#27272A] hover:border-zinc-500'
+                ? 'bg-rose-50/70 border-rose-500 ring-2 ring-rose-200 shadow-xs'
+                : 'bg-slate-50/60 border-slate-200 hover:border-rose-300 hover:bg-rose-50/30'
             }`}
           >
-            <div className="text-xs font-bold text-red-400 flex items-center justify-between">
+            <div className="text-xs font-heading font-bold text-rose-800 flex items-center justify-between">
               <span>⚡ Preset 2: Severe Spike + -999</span>
-              <span className="text-[10px] bg-red-950 text-red-300 border border-red-800 px-1.5 py-0.2 rounded font-bold">
+              <span className="text-[10px] bg-rose-100 text-rose-800 font-mono font-bold px-2 py-0.5 rounded-full border border-rose-200">
                 ▲ AQI 413
               </span>
             </div>
-            <p className="text-[11px] text-zinc-400 font-sans mt-1">
+            <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
               Ward 4 PM2.5 spike (0.31 mg/m³ = 310 µg), inversion trap, and Ward 2 optical -999 fault.
             </p>
           </button>
@@ -152,19 +152,19 @@ export const IngestAuditView: React.FC<IngestAuditViewProps> = ({
             type="button"
             onClick={() => onSelectPreset('post_action')}
             disabled={isLoading}
-            className={`p-3.5 rounded-xl border text-left font-mono transition ${
+            className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
               activePreset === 'post_action'
-                ? 'bg-zinc-800 border-white ring-1 ring-white'
-                : 'bg-[#09090B] border-[#27272A] hover:border-zinc-500'
+                ? 'bg-blue-50/70 border-blue-500 ring-2 ring-blue-200 shadow-xs'
+                : 'bg-slate-50/60 border-slate-200 hover:border-blue-300 hover:bg-blue-50/30'
             }`}
           >
-            <div className="text-xs font-bold text-blue-400 flex items-center justify-between">
+            <div className="text-xs font-heading font-bold text-blue-800 flex items-center justify-between">
               <span>⚡ Preset 3: Post-Intervention Shift</span>
-              <span className="text-[10px] bg-blue-950 text-blue-300 border border-blue-800 px-1.5 py-0.2 rounded">
+              <span className="text-[10px] bg-blue-100 text-blue-800 font-mono font-semibold px-2 py-0.5 rounded-full border border-blue-200">
                 -62% Delta
               </span>
             </div>
-            <p className="text-[11px] text-zinc-400 font-sans mt-1">
+            <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
               Mist cannons deployed, construction dust suppressed, and sensor repaired. Demonstrates diff.
             </p>
           </button>
@@ -178,308 +178,312 @@ export const IngestAuditView: React.FC<IngestAuditViewProps> = ({
         {/* LEFT COLUMN: MULTIMODAL & RAW INPUT ZONE                 */}
         {/* ======================================================== */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="p-5 rounded-2xl border border-[#27272A] bg-[#18181B] space-y-4">
+          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-4">
             
-            <div className="flex items-center justify-between border-b border-[#27272A] pb-3">
-              <span className="font-mono text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
-                <Database className="w-4 h-4 text-zinc-400" />
-                STEP 1: SENSOR INGESTION &amp; INPUT ZONE
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <Database className="w-4 h-4 text-blue-600" />
+                <span className="font-heading text-xs font-bold uppercase tracking-wider text-slate-900">
+                  STEP 1: SENSOR INGESTION &amp; INPUT ZONE
+                </span>
+              </div>
+              <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded">
+                Live Ingest
               </span>
-              <span className="text-[10px] font-mono text-zinc-500">Live Ingest</span>
             </div>
 
-            {/* Multimodal Dropzone */}
-            <div>
+            {/* Drag & Drop File Upload Area */}
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="border-2 border-dashed border-slate-300 hover:border-blue-500 bg-slate-50/70 hover:bg-blue-50/30 rounded-xl p-5 text-center cursor-pointer transition group"
+            >
               <input
-                id="telemetryUploadInput"
-                name="telemetryUploadInput"
-                aria-label="Upload raw CSV, XML, TXT, JSON, PDF Bulletin or LED Photo"
-                type="file"
                 ref={fileInputRef}
+                type="file"
+                accept=".csv,.txt,.json,.xml,.pdf,image/*"
                 onChange={handleFileChange}
-                accept=".csv,.tsv,.txt,.xml,.json,.pdf,.png,.jpg,.jpeg"
                 className="hidden"
               />
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-[#27272A] hover:border-zinc-400 rounded-xl p-5 text-center cursor-pointer bg-[#09090B] transition group"
-                role="button"
-                tabIndex={0}
-                aria-label="Upload raw CSV, XML, TXT, JSON, PDF Bulletin or LED Photo"
-              >
-                <Upload className="w-6 h-6 mx-auto mb-2 text-zinc-500 group-hover:text-white transition" />
-                <div className="text-xs font-mono font-semibold text-zinc-300">
-                  {selectedFile ? selectedFile.name : "Drop CSV, XML, TXT, JSON, PDF Bulletin, or LED Photo"}
-                </div>
-                <p className="text-[11px] text-zinc-500 font-mono mt-1">
-                  Click to browse sensor streams or roadside photos (Max 5MB)
-                </p>
-                {selectedFile && (
-                  <span className="inline-block mt-2 text-[10px] font-mono bg-zinc-800 text-white px-2 py-0.5 rounded border border-zinc-600">
+              <Upload className="w-7 h-7 mx-auto text-slate-400 group-hover:text-blue-600 transition mb-2" />
+              
+              {selectedFile ? (
+                <div className="space-y-1">
+                  <span className="font-mono text-xs font-bold text-slate-900 block truncate">
+                    {selectedFile.name}
+                  </span>
+                  <span className="text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-mono">
                     Staged: {selectedFile.name} ({selectedFile.size})
                   </span>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-slate-700">
+                    Click to browse sensor streams or roadside photos
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    CSV, XML, JSON, TXT, PDF Bulletins, or Sensor LCD Photos (Max 5MB)
+                  </p>
+                </div>
+              )}
             </div>
 
-            {/* Paste Messy WhatsApp / Table Textarea */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label htmlFor="fieldReportTextarea" className="block text-xs font-mono uppercase tracking-wider text-zinc-400">
-                  Or Paste Field Report / Table:
+            {/* Paste Table / Textarea */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs text-slate-600">
+                <label htmlFor="telemetryText" className="font-semibold text-slate-700">
+                  OR PASTE FIELD REPORT / TABLE:
                 </label>
                 <button
                   type="button"
-                  onClick={() => setPastedText(
-`Ward 4 | SNS_W04_01 | PM2.5 | 0.31 mg/m3
-Ward 2 | SNS_W02_03 | PM10  | -999
-Ward 3 | SNS_W03_02 | NO2   | NULL
-Ward 1 | SNS_W01_01 | PM2.5 | 82 ug/m3`
-                  )}
-                  className="text-[10px] font-mono text-zinc-400 hover:text-white underline"
+                  onClick={() => {
+                    const sample = `# DELHI POLLUTION CONTROL COMMITTEE - CONTINUOUS AMBIENT AIR TELEMETRY
+# Timestamp: 2026-11-14 08:30 IST | Emergency Monitoring Cycle
+Ward_ID,Ward_Name,Sensor_ID,Pollutant,Raw_Reading,Units,Remarks
+W_04,Ward 4 - Industrial Belt,SNS_W04_01,PM2.5,0.31,mg/m3,Severe smoke plume near diesel generator yard
+W_04,Ward 4 - Industrial Belt,SNS_W04_01,PM10,480.0,ug/m3,Heavy particulate loading
+W_04,Ward 4 - Industrial Belt,SNS_W04_02,CO,2.8,mg/m3,Spike near highway freight corridor
+W_02,Ward 2 - Central Market,SNS_W02_03,PM10,-999,ug/m3,Optical sensor hardware fault
+W_01,Ward 1 - Green Belt,SNS_W01_02,PM2.5,74.5,ug/m3,Normal calibrated baseline`;
+                    setPastedText(sample);
+                  }}
+                  className="text-[11px] text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
                 >
                   [Insert Sample]
                 </button>
               </div>
+
               <textarea
-                id="fieldReportTextarea"
-                name="fieldReportTextarea"
+                id="telemetryText"
+                rows={6}
                 value={pastedText}
                 onChange={(e) => setPastedText(e.target.value)}
-                rows={5}
-                placeholder="Paste messy table or field WhatsApp text e.g.:&#10;Ward 4 | PM2.5 | 0.31 mg/m3&#10;Ward 2 | PM10  | -999&#10;Ward 3 | NO2   | NULL"
-                className="w-full p-3 text-xs font-mono bg-[#09090B] border border-[#27272A] rounded-xl text-zinc-200 placeholder-zinc-600 focus:border-zinc-400 focus:outline-none"
+                placeholder="Paste messy CSV, tab-separated readings, irregular units (mg/m³, ug/m³), or raw field notes..."
+                className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono text-slate-800 placeholder-slate-400 focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition resize-none"
               />
             </div>
 
-            {/* Clean & Generate Brief Button */}
+            {/* Action Button: Clean & Generate */}
             <button
               type="button"
               onClick={handleCleanAndGenerate}
               disabled={isLoading}
-              className="w-full py-3 px-4 rounded-xl bg-[#FAFAFA] text-[#09090B] hover:bg-white font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-2 disabled:opacity-50 font-mono shadow-lg"
+              className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-heading font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               {isLoading ? (
                 <>
-                  <RefreshCw className="w-4 h-4 animate-spin text-black" />
-                  <span>NORMALIZING SENSOR STREAMS...</span>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Processing Physical Telemetry...</span>
                 </>
               ) : (
                 <>
-                  <span>[ Clean &amp; Generate Brief -&gt; ]</span>
+                  <Play className="w-3.5 h-3.5 fill-white" />
+                  <span>CLEAN &amp; GENERATE BRIEF -&gt;</span>
                 </>
               )}
             </button>
 
             {hasData && (
-              <div className="pt-2 border-t border-[#27272A] flex justify-end">
-                <button
-                  onClick={onNavigateToCommand}
-                  className="text-xs font-mono text-zinc-300 hover:text-white flex items-center gap-1.5 transition font-semibold"
-                >
-                  <span>Proceed to Step 2: Command &amp; Diff</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={onNavigateToCommand}
+                className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-heading font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Proceed to Step 2: Command &amp; Diff</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             )}
 
           </div>
         </div>
 
         {/* ======================================================== */}
-        {/* RIGHT COLUMN: DETERMINISTIC AUDIT & CLEANED REPORT       */}
+        {/* RIGHT COLUMN: DETERMINISTIC AUDIT & CLEANED TABLE        */}
         {/* ======================================================== */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="p-5 rounded-2xl border border-[#27272A] bg-[#18181B] space-y-4 min-h-[480px] flex flex-col justify-between">
+          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-4">
             
-            {/* Table Header & Filter Tabs */}
-            <div>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#27272A] pb-3">
-                <div>
-                  <span className="font-mono text-xs font-bold uppercase tracking-wider text-white">
-                    DETERMINISTIC AUDIT &amp; CLEANED TELEMETRY TABLE
-                  </span>
-                  <p className="text-[11px] font-mono text-zinc-400 mt-0.5">
-                    Physical validation with zero hallucinated concentrations
-                  </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+              <div>
+                <span className="font-heading text-xs font-bold uppercase tracking-wider text-slate-900 block">
+                  DETERMINISTIC AUDIT &amp; CLEANED TELEMETRY TABLE
+                </span>
+                <span className="text-xs text-slate-500">
+                  Physical validation with zero hallucinated concentrations
+                </span>
+              </div>
+
+              {hasData && (
+                <div className="flex items-center gap-1.5 self-start sm:self-auto" role="group" aria-label="Table Filter">
+                  <button
+                    type="button"
+                    onClick={() => setFilter('all')}
+                    className={`px-2.5 py-1 rounded-md text-xs font-semibold transition cursor-pointer ${
+                      filter === 'all'
+                        ? 'bg-slate-900 text-white shadow-xs'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    All ({readings.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilter('valid')}
+                    className={`px-2.5 py-1 rounded-md text-xs font-semibold transition cursor-pointer ${
+                      filter === 'valid'
+                        ? 'bg-emerald-600 text-white shadow-xs'
+                        : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                    }`}
+                  >
+                    Valid ({validReadings.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilter('flagged')}
+                    className={`px-2.5 py-1 rounded-md text-xs font-semibold transition cursor-pointer ${
+                      filter === 'flagged'
+                        ? 'bg-rose-600 text-white shadow-xs'
+                        : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200'
+                    }`}
+                  >
+                    ✖ Flagged ({flaggedReadings.length})
+                  </button>
                 </div>
+              )}
+            </div>
 
-                {hasData && (
-                  <div className="flex items-center gap-1.5 font-mono text-xs">
+            {/* Table or Empty Standby State */}
+            <div>
+              {!hasData ? (
+                <div className="py-12 px-4 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 text-center space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center mx-auto">
+                    <Inbox className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="font-heading font-bold text-sm text-slate-800">
+                      AWAITING TELEMETRY INGESTION
+                    </h3>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      No sensor streams loaded yet. Click any <strong className="text-slate-700">1-Click Demo Preset</strong> above, or upload/paste a telemetry file on the left to run deterministic audit.
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-center gap-2 pt-2">
                     <button
                       type="button"
-                      onClick={() => setFilter('all')}
-                      className={`px-2.5 py-1 rounded-lg transition text-[11px] font-bold ${
-                        filter === 'all'
-                          ? 'bg-zinc-100 text-zinc-950'
-                          : 'bg-[#09090B] text-zinc-400 hover:text-white border border-[#27272A]'
-                      }`}
+                      onClick={() => onSelectPreset('baseline')}
+                      className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer shadow-2xs"
                     >
-                      [Filter: All ({readings.length})]
+                      ⚡ Load Baseline Day
                     </button>
-
                     <button
                       type="button"
-                      onClick={() => setFilter('valid')}
-                      className={`px-2.5 py-1 rounded-lg transition text-[11px] font-bold ${
-                        filter === 'valid'
-                          ? 'bg-zinc-100 text-zinc-950'
-                          : 'bg-[#09090B] text-zinc-400 hover:text-white border border-[#27272A]'
-                      }`}
+                      onClick={() => onSelectPreset('crisis')}
+                      className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-xs font-semibold text-white cursor-pointer shadow-xs"
                     >
-                      [Valid ({validReadings.length})]
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setFilter('flagged')}
-                      className={`px-2.5 py-1 rounded-lg transition text-[11px] font-bold ${
-                        filter === 'flagged'
-                          ? 'bg-red-500 text-white'
-                          : 'bg-[#09090B] text-zinc-400 hover:text-white border border-[#27272A]'
-                      }`}
-                    >
-                      [✖ Flagged ({flaggedReadings.length})]
+                      ⚡ Load Severe Crisis Preset
                     </button>
                   </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-slate-200 max-h-80 bg-white shadow-2xs">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 text-slate-700 sticky top-0 uppercase tracking-wider text-[11px] font-heading font-bold border-b border-slate-200">
+                      <tr>
+                        <th className="p-3">ID</th>
+                        <th className="p-3">Ward</th>
+                        <th className="p-3">Pollutant</th>
+                        <th className="p-3">Raw</th>
+                        <th className="p-3">Norm (µg/m³)</th>
+                        <th className="p-3">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-xs">
+                      {displayedReadings.map((r) => {
+                        const isFault = r.validation_status === 'INVALID_ANOMALY' || r.raw_value === '-999';
+                        const isGap = r.validation_status === 'MISSING' || r.raw_value === 'NULL' || r.raw_value === 'NA';
+                        const isConverted = r.raw_unit.toLowerCase().includes('mg');
+                        const isSelected = highlightedRowId === r.row_id;
 
-              {/* Ingest Table OR Clean Awaiting Input State */}
-              <div className="mt-4">
-                {!hasData ? (
-                  <div className="p-8 rounded-xl border border-dashed border-zinc-700 bg-[#09090B]/60 text-center space-y-3 my-4">
-                    <div className="w-12 h-12 rounded-2xl bg-zinc-800/80 border border-zinc-700 mx-auto flex items-center justify-center text-zinc-400">
-                      <Inbox className="w-6 h-6 text-zinc-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wide">
-                        Awaiting Telemetry Ingestion
-                      </h3>
-                      <p className="text-xs text-zinc-400 font-sans max-w-md mx-auto mt-1 leading-relaxed">
-                        No sensor streams loaded yet. Click any <strong>1-Click Demo Preset</strong> above, or upload/paste a telemetry file on the left to run deterministic audit and generate report.
-                      </p>
-                    </div>
-
-                    <div className="pt-2 flex flex-wrap justify-center gap-2 font-mono text-[11px]">
-                      <button
-                        type="button"
-                        onClick={() => onSelectPreset('baseline')}
-                        className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-emerald-300 border border-emerald-500/30 transition"
-                      >
-                        ⚡ Load Baseline Day
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onSelectPreset('crisis')}
-                        className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-red-300 border border-red-500/30 transition"
-                      >
-                        ⚡ Load Severe Crisis Preset
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto rounded-xl border border-[#27272A] max-h-80 bg-[#09090B]">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-[#18181B] text-zinc-400 sticky top-0 uppercase tracking-wider text-[10px] font-mono border-b border-[#27272A]">
-                        <tr>
-                          <th className="p-2.5">ID</th>
-                          <th className="p-2.5">Ward</th>
-                          <th className="p-2.5">Pollutant</th>
-                          <th className="p-2.5">Raw</th>
-                          <th className="p-2.5">Norm (µg/m³)</th>
-                          <th className="p-2.5">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[#27272A] font-mono text-[11px]">
-                        {displayedReadings.map((r) => {
-                          const isFault = r.validation_status === 'INVALID_ANOMALY' || r.raw_value === '-999';
-                          const isGap = r.validation_status === 'MISSING' || r.raw_value === 'NULL' || r.raw_value === 'NA';
-                          const isConverted = r.raw_unit.toLowerCase().includes('mg');
-                          const isSelected = highlightedRowId === r.row_id;
-
-                          return (
-                            <tr
-                              key={r.row_id}
-                              onClick={() => onSelectRow(r.row_id)}
-                              className={`cursor-pointer transition-colors ${
-                                isSelected
-                                  ? 'bg-zinc-800 ring-1 ring-white'
-                                  : isFault
-                                  ? 'bg-striped-fault text-zinc-300'
-                                  : isGap
-                                  ? 'bg-amber-950/20 text-amber-200'
-                                  : 'hover:bg-zinc-800/40 text-zinc-300'
-                              }`}
-                            >
-                              <td className="p-2.5 font-bold text-white">
-                                <span className="underline decoration-dotted">{r.row_id}</span>
-                              </td>
-                              <td className="p-2.5 font-sans font-medium text-zinc-200">
-                                {r.ward_name}
-                              </td>
-                              <td className="p-2.5 font-bold text-white">
-                                {r.pollutant}
-                              </td>
-                              <td className="p-2.5 text-zinc-400">
-                                {r.raw_value} {r.raw_unit}
-                              </td>
-                              <td className="p-2.5 font-bold">
-                                {isFault ? (
-                                  <span className="text-zinc-500 font-mono">EXCLUDED</span>
-                                ) : isGap ? (
-                                  <span className="text-amber-400 font-mono">GAP</span>
-                                ) : (
-                                  <span className="text-emerald-400 flex items-center gap-1.5">
-                                    <span>{r.normalized_value_ugm3}</span>
-                                    {isConverted && (
-                                      <span className="text-[10px] bg-zinc-800 text-cyan-300 px-1 py-0.2 rounded border border-cyan-800" title="1000x scaled from mg/m³ to µg/m³">
-                                        🔄 1000x
-                                      </span>
-                                    )}
-                                  </span>
-                                )}
-                              </td>
-                              <td className="p-2.5">
-                                <StatusBadge
-                                  severity={r.aqi_severity}
-                                  status={r.validation_status}
-                                  value={r.normalized_value_ugm3}
-                                  rawStr={r.raw_value}
-                                />
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
+                        return (
+                          <tr
+                            key={r.row_id}
+                            onClick={() => onSelectRow(r.row_id)}
+                            className={`cursor-pointer transition-colors ${
+                              isSelected
+                                ? 'bg-blue-50/80 ring-1 ring-blue-300'
+                                : isFault
+                                ? 'bg-rose-50/40 text-slate-800'
+                                : isGap
+                                ? 'bg-amber-50/40 text-slate-800'
+                                : 'hover:bg-slate-50 text-slate-700'
+                            }`}
+                          >
+                            <td className="p-3 font-mono font-bold text-slate-900">
+                              <span className="underline decoration-dotted underline-offset-2">{r.row_id}</span>
+                            </td>
+                            <td className="p-3 font-medium text-slate-800">
+                              {r.ward_name}
+                            </td>
+                            <td className="p-3 font-mono font-bold text-slate-900">
+                              {r.pollutant}
+                            </td>
+                            <td className="p-3 font-mono text-slate-600">
+                              {r.raw_value} {r.raw_unit}
+                            </td>
+                            <td className="p-3 font-mono font-bold">
+                              {isFault ? (
+                                <span className="text-slate-400 font-mono">EXCLUDED</span>
+                              ) : isGap ? (
+                                <span className="text-amber-600 font-mono">GAP</span>
+                              ) : (
+                                <span className="text-slate-900 flex items-center gap-1.5">
+                                  <span>{r.normalized_value_ugm3}</span>
+                                  {isConverted && (
+                                    <span className="text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-semibold border border-blue-200" title="1000x scaled from mg/m³ to µg/m³">
+                                      🔄 1000x
+                                    </span>
+                                  )}
+                                </span>
+                              )}
+                            </td>
+                            <td className="p-3">
+                              <StatusBadge
+                                severity={r.aqi_severity}
+                                status={r.validation_status}
+                                value={r.normalized_value_ugm3}
+                                rawStr={r.raw_value}
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
 
             {/* 🛠 DATA INTEGRITY & ANOMALY LOG */}
             {hasData && (
-              <div className="p-4 rounded-xl bg-[#09090B] border border-[#27272A] space-y-2 mt-4">
-                <div className="flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-wider text-white">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 mt-4">
+                <div className="flex items-center gap-2 text-xs font-heading font-bold uppercase tracking-wider text-slate-900">
                   <span>🛠 DATA INTEGRITY &amp; ANOMALY LOG</span>
-                  <span className="text-[10px] text-zinc-500">Audit Trail</span>
+                  <span className="text-[10px] text-slate-500 font-mono">Audit Trail</span>
                 </div>
                 
-                <div className="space-y-1.5 font-mono text-xs text-zinc-300">
+                <div className="space-y-2 text-xs text-slate-700">
                   {flags.length > 0 ? (
                     flags.map((f, i) => (
                       <div key={i} className="flex items-start gap-2">
-                        <span className="text-zinc-500">•</span>
+                        <span className="text-rose-500 font-bold">•</span>
                         <div>
                           <TraceabilityChip rowId={f.row_id} onClick={onSelectRow} isSelected={highlightedRowId === f.row_id} />
-                          <span className="ml-1.5 text-zinc-400">{f.explanation}</span>
+                          <span className="ml-1.5 text-slate-600">{f.explanation}</span>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="flex items-center gap-2 text-zinc-400">
-                      <span>•</span>
+                    <div className="flex items-center gap-2 text-slate-600">
+                      <span className="text-emerald-600">•</span>
                       <span>All telemetry rows passed physical sanity checks with zero hardware faults.</span>
                     </div>
                   )}

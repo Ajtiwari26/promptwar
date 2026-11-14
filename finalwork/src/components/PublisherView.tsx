@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Copy, Check, Printer, Share2, Globe, HeartPulse, User, Baby, CheckSquare, Square, Download, PhoneCall } from 'lucide-react';
+import { Copy, Check, Printer, Share2, Globe, HeartPulse, User, Baby, CheckSquare, Square, Download, PhoneCall, FileText } from 'lucide-react';
 import { CivicBriefingOutput, CleanedReadingItemSchema } from '../types/briefingSchema.js';
 import { TraceabilityChip } from './TraceabilityChip.js';
 import { buildLocalizedAdvisories } from '../i18n/advisories.js';
@@ -46,7 +46,7 @@ export const PublisherView: React.FC<PublisherViewProps> = ({
   const liveChecklist = briefing?.dual_outputs?.internal_briefing_note?.operational_checklist;
 
   const defaultChecklist = [
-    { time: "08:30", action: "Dispatch water mist cannons to Ward 4 arterial roads to suppress coarse dust", ref: "ROW_04" },
+    { time: "08:30", action: "Deploy anti-smog water mist cannons to Ward 4 arterial roads to suppress coarse dust", ref: "ROW_04" },
     { time: "09:00", action: "Enforce dust stop-work notice at Sector 4 metro excavation site", ref: "ROW_04" },
     { time: "11:00", action: "Replace Ward 2 optical sensor fuse & recalibrate SNS_W02_03", ref: "ROW_07" }
   ];
@@ -102,21 +102,22 @@ _Distributed via Civic Air Quality Briefing Studio_`;
     <div className="space-y-6">
       
       {/* Header Info Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-[#27272A] bg-[#18181B]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 rounded-2xl border border-slate-200 bg-white shadow-xs">
         <div>
-          <span className="font-mono text-xs font-bold uppercase tracking-wider text-white">
-            DUAL-OUTPUT PUBLISHER & CITIZEN BROADCAST STUDIO
+          <span className="font-heading text-xs font-bold uppercase tracking-wider text-slate-900 block">
+            DUAL-OUTPUT PUBLISHER &amp; CITIZEN BROADCAST STUDIO
           </span>
-          <p className="text-[11px] font-mono text-zinc-400 mt-0.5">
+          <p className="text-xs text-slate-500 mt-0.5">
             Synchronized generation: Internal Municipal Memo (Left) + Citizen Multilingual Advisory (Right)
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-mono bg-zinc-800 text-emerald-400 border border-zinc-700 px-2 py-0.5 rounded">
-            ● Dual Outputs Synced
+          <span className="text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>Dual Outputs Synced</span>
           </span>
           {briefing?.brief_metadata?.brief_id && (
-            <span className="text-[10px] font-mono bg-zinc-900 text-zinc-400 border border-zinc-700 px-2 py-0.5 rounded">
+            <span className="text-xs font-mono bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-1 rounded-full">
               Ref: {briefing.brief_metadata.brief_id}
             </span>
           )}
@@ -130,84 +131,101 @@ _Distributed via Civic Air Quality Briefing Studio_`;
         {/* OUTPUT A: INTERNAL OPERATIONAL BRIEFING NOTE (LEFT)      */}
         {/* ======================================================== */}
         <div className="lg:col-span-6 space-y-4">
-          <div className="p-5 rounded-xl border border-[#27272A] bg-[#18181B] space-y-4 shadow-xl">
+          <div className="p-5 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-xs">
             
             {/* Header & Actions */}
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#27272A] pb-3">
-              <span className="font-mono text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
-                📋 OUTPUT A: INTERNAL BRIEFING NOTE
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <span className="font-heading text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <FileText className="w-4 h-4 text-blue-600" />
+                <span>OUTPUT A: INTERNAL BRIEFING NOTE</span>
               </span>
 
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={handleCopyMarkdown}
-                  className="px-2.5 py-1 rounded bg-[#09090B] border border-[#27272A] hover:border-zinc-400 font-mono text-[11px] font-semibold text-zinc-300 hover:text-white transition flex items-center gap-1.5"
+                  className="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700 transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 >
-                  {copiedMarkdown ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedMarkdown ? 'Copied' : '[Copy Markdown]'}</span>
+                  {copiedMarkdown ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedMarkdown ? 'Copied' : 'Copy MD'}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="px-2.5 py-1 rounded bg-[#09090B] border border-[#27272A] hover:border-zinc-400 font-mono text-[11px] font-semibold text-zinc-300 hover:text-white transition flex items-center gap-1.5"
+                  className="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700 transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 >
                   <Printer className="w-3.5 h-3.5" />
-                  <span>[🖨️ Print / Export PDF]</span>
+                  <span>Print PDF</span>
                 </button>
               </div>
             </div>
 
             {/* Official Municipal Memo Body */}
-            <div className="p-4 rounded-lg bg-[#09090B] border border-[#27272A] font-mono text-xs space-y-4 text-zinc-200">
+            <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-200 text-xs space-y-4 text-slate-800">
               
-              <div className="border-b border-[#27272A] pb-3 text-[11px] text-zinc-400 space-y-0.5">
-                <div>TO: <strong className="text-white">Municipal Ward 4 Command &amp; Disaster Cell</strong></div>
-                <div>REF: <strong className="text-white">{briefing?.brief_metadata?.brief_id || 'BRIEF-2026-11-14-AM'}</strong></div>
-                <div>DATE: <strong className="text-white">14 Nov 2026, 08:30 IST</strong></div>
-                <div>STATUS: <strong className="text-red-400">▲ CRITICAL ESCALATION (GRAP STAGE IV)</strong></div>
+              <div className="border-b border-slate-200 pb-3 text-xs text-slate-600 space-y-1 font-mono">
+                <div>TO: <strong className="text-slate-900">Municipal Ward 4 Command &amp; Disaster Cell</strong></div>
+                <div>REF: <strong className="text-slate-900">{briefing?.brief_metadata?.brief_id || 'BRIEF-2026-11-14-AM'}</strong></div>
+                <div>DATE: <strong className="text-slate-900">14 Nov 2026, 08:30 IST</strong></div>
+                <div>STATUS: <strong className="text-rose-700 font-bold">▲ CRITICAL ESCALATION (GRAP STAGE IV)</strong></div>
               </div>
 
               {/* 1. Executive Summary */}
               <div className="space-y-1.5">
-                <div className="font-bold text-white text-xs uppercase tracking-wide">
+                <div className="font-heading font-bold text-slate-900 text-xs uppercase tracking-wide">
                   1. EXECUTIVE SUMMARY
                 </div>
-                <p className="text-zinc-300 leading-relaxed font-sans text-xs">
+                <p className="text-slate-700 leading-relaxed font-sans text-xs">
                   {liveExecutiveSummary ? (
                     liveExecutiveSummary
                   ) : (
                     <>
-                      Severe particulate spike in Ward 4 (<strong className="font-mono text-white">310.0 µg/m³</strong> <TraceabilityChip rowId="ROW_04" onClick={onSelectCitation} />), up <strong className="text-red-400">42%</strong> from yesterday. Ward 2 unverified due to sensor SNS_W02_03 optical error (-999 <TraceabilityChip rowId="ROW_07" onClick={onSelectCitation} />); classified as Telemetry Blind Spot.
+                      Severe particulate spike in Ward 4 (<strong className="font-mono text-slate-900">310.0 µg/m³</strong> <TraceabilityChip rowId="ROW_04" onClick={onSelectCitation} />), up <strong className="text-rose-700">42%</strong> from yesterday. Unfavorable micro-meteorology with wind speed &lt;1m/s creating an inversion trap. Ward 2 telemetry unverified due to sensor SNS_W02_03 hardware error (<strong className="font-mono text-rose-700">-999</strong> <TraceabilityChip rowId="ROW_07" onClick={onSelectCitation} />); flagged as Telemetry Blind Spot.
                     </>
                   )}
                 </p>
               </div>
 
               {/* 2. Mandatory Action Checklist */}
-              <div className="space-y-2 pt-2 border-t border-[#27272A]">
-                <div className="font-bold text-white text-xs uppercase tracking-wide">
+              <div className="space-y-2">
+                <div className="font-heading font-bold text-slate-900 text-xs uppercase tracking-wide">
                   2. MANDATORY ACTION CHECKLIST
                 </div>
-                <div className="space-y-2 text-xs">
-                  {memoChecklist.map((item, idx) => {
+                <div className="space-y-1.5">
+                  {memoChecklist.map((c, idx) => {
                     const isChecked = !!checkedMemoItems[idx];
                     return (
                       <div
                         key={idx}
                         onClick={() => toggleMemoItem(idx)}
-                        className="flex items-center gap-2.5 p-2 rounded bg-[#18181B] border border-[#27272A] cursor-pointer hover:border-zinc-500 transition"
+                        className={`p-2.5 rounded-lg border transition cursor-pointer flex items-start gap-2.5 ${
+                          isChecked
+                            ? 'bg-slate-100/70 border-slate-200 line-through text-slate-400'
+                            : 'bg-white border-slate-200 text-slate-800 hover:border-slate-300'
+                        }`}
                       >
-                        {isChecked ? (
-                          <CheckSquare className="w-4 h-4 text-emerald-400 shrink-0" />
-                        ) : (
-                          <Square className="w-4 h-4 text-zinc-500 shrink-0" />
-                        )}
-                        <span className={`flex-1 text-[11px] ${isChecked ? 'line-through text-zinc-500' : 'text-zinc-200'}`}>
-                          [{item.time}] {item.action}
-                        </span>
-                        <TraceabilityChip rowId={item.ref} onClick={onSelectCitation} />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleMemoItem(idx);
+                          }}
+                          className="mt-0.5 text-slate-400 hover:text-blue-600 shrink-0 cursor-pointer"
+                        >
+                          {isChecked ? (
+                            <CheckSquare className="w-4 h-4 text-emerald-600" />
+                          ) : (
+                            <Square className="w-4 h-4 text-slate-400" />
+                          )}
+                        </button>
+                        <div className="flex-1 text-xs">
+                          <span className="font-mono font-bold text-slate-600 mr-1.5">[{c.time}]</span>
+                          <span>{c.action}</span>
+                          <span className="ml-2" onClick={(e) => e.stopPropagation()}>
+                            <TraceabilityChip rowId={c.ref} onClick={onSelectCitation} />
+                          </span>
+                        </div>
                       </div>
                     );
                   })}
@@ -215,13 +233,15 @@ _Distributed via Civic Air Quality Briefing Studio_`;
               </div>
 
               {/* 3. Data Traceability Footnotes */}
-              <div className="space-y-1.5 pt-2 border-t border-[#27272A] text-[11px] text-zinc-400">
-                <div className="font-bold text-white text-xs uppercase tracking-wide">
+              <div className="border-t border-slate-200 pt-3 space-y-1 text-xs text-slate-600">
+                <div className="font-heading font-bold text-slate-900 uppercase tracking-wide">
                   3. DATA TRACEABILITY FOOTNOTES
                 </div>
-                <div>• <strong className="text-zinc-200 font-mono">ROW_04:</strong> Sensor SNS_W04_01 (Normalized 310.0 µg/m³, scaled from 0.31 mg/m³)</div>
-                <div>• <strong className="text-zinc-200 font-mono">ROW_05:</strong> Sensor SNS_W04_01 (PM10: 480.0 µg/m³)</div>
-                <div>• <strong className="text-zinc-200 font-mono">ROW_07:</strong> Sensor SNS_W02_03 (-999 Hardware Fault, excluded from statistics)</div>
+                <div className="space-y-1 font-mono text-[11px]">
+                  <div>• <strong className="text-slate-900">ROW_04:</strong> Sensor SNS_W04_01 (Normalized 310.0 µg/m³, scaled from 0.31 mg/m³)</div>
+                  <div>• <strong className="text-slate-900">ROW_05:</strong> Sensor SNS_W04_01 (PM10: 480.0 µg/m³)</div>
+                  <div>• <strong className="text-slate-900">ROW_07:</strong> Sensor SNS_W02_03 (-999 Hardware Fault, excluded from statistics)</div>
+                </div>
               </div>
 
             </div>
@@ -230,131 +250,132 @@ _Distributed via Civic Air Quality Briefing Studio_`;
         </div>
 
         {/* ======================================================== */}
-        {/* OUTPUT B: PUBLIC CITIZEN ADVISORY (RIGHT)                */}
+        {/* OUTPUT B: CITIZEN ADVISORY & MULTILINGUAL BROADCAST      */}
         {/* ======================================================== */}
         <div className="lg:col-span-6 space-y-4">
-          <div className="p-5 rounded-xl border border-[#27272A] bg-[#18181B] space-y-4 shadow-xl">
+          <div className="p-5 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-xs">
             
-            {/* Header */}
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#27272A] pb-3">
-              <span className="font-mono text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
-                📢 OUTPUT B: PUBLIC CITIZEN ADVISORY
+            {/* Header & Language Selector */}
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <span className="font-heading text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <Globe className="w-4 h-4 text-blue-600" />
+                <span>OUTPUT B: PUBLIC CITIZEN ADVISORY</span>
               </span>
 
-              {/* Language Switcher */}
-              <div className="flex items-center gap-1 font-mono text-xs">
+              {/* Language Switcher: English, Hindi, Marathi */}
+              <div className="flex items-center gap-1" role="group" aria-label="Advisory Language">
                 <button
                   type="button"
                   onClick={() => setSelectedLang('en')}
-                  className={`px-2 py-0.5 rounded transition text-[11px] font-bold ${
+                  className={`px-2.5 py-1 rounded-md text-xs font-semibold transition cursor-pointer ${
                     selectedLang === 'en'
-                      ? 'bg-zinc-100 text-zinc-950'
-                      : 'bg-[#09090B] text-zinc-400 hover:text-white border border-[#27272A]'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
                 >
-                  [English]
+                  English
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedLang('hi')}
-                  className={`px-2 py-0.5 rounded transition text-[11px] font-bold ${
+                  className={`px-2.5 py-1 rounded-md text-xs font-semibold transition cursor-pointer ${
                     selectedLang === 'hi'
-                      ? 'bg-zinc-100 text-zinc-950'
-                      : 'bg-[#09090B] text-zinc-400 hover:text-white border border-[#27272A]'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
                 >
-                  [हिंदी]
+                  हिंदी
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedLang('mr')}
-                  className={`px-2 py-0.5 rounded transition text-[11px] font-bold ${
+                  className={`px-2.5 py-1 rounded-md text-xs font-semibold transition cursor-pointer ${
                     selectedLang === 'mr'
-                      ? 'bg-zinc-100 text-zinc-950'
-                      : 'bg-[#09090B] text-zinc-400 hover:text-white border border-[#27272A]'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
                 >
-                  [मराठी]
+                  मराठी
                 </button>
               </div>
             </div>
 
             {/* Reading Tier & Vulnerability Tabs */}
             <div className="space-y-1.5">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 block">
+              <span className="text-xs font-heading font-semibold uppercase tracking-wider text-slate-500 block">
                 Reading Tier &amp; Vulnerability Level:
               </span>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 font-mono text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                 <button
                   type="button"
                   onClick={() => setSelectedTier('child_friendly')}
-                  className={`p-2 rounded text-left transition flex items-center gap-1.5 border ${
+                  className={`p-2.5 rounded-xl text-left transition flex items-center gap-2 border cursor-pointer ${
                     selectedTier === 'child_friendly'
-                      ? 'bg-zinc-100 text-zinc-950 font-bold border-white'
-                      : 'bg-[#09090B] text-zinc-400 hover:text-white border-[#27272A]'
+                      ? 'bg-blue-50 text-blue-800 font-bold border-blue-300 ring-2 ring-blue-100 shadow-xs'
+                      : 'bg-white text-slate-700 hover:bg-slate-50 border-slate-200'
                   }`}
                 >
-                  <Baby className="w-3.5 h-3.5 shrink-0" />
-                  <span className="truncate">[🧒 Child-Friendly]</span>
+                  <Baby className="w-4 h-4 text-blue-600 shrink-0" />
+                  <span className="truncate">🧒 Child-Friendly</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setSelectedTier('general_public')}
-                  className={`p-2 rounded text-left transition flex items-center gap-1.5 border ${
+                  className={`p-2.5 rounded-xl text-left transition flex items-center gap-2 border cursor-pointer ${
                     selectedTier === 'general_public'
-                      ? 'bg-zinc-100 text-zinc-950 font-bold border-white'
-                      : 'bg-[#09090B] text-zinc-400 hover:text-white border-[#27272A]'
+                      ? 'bg-blue-50 text-blue-800 font-bold border-blue-300 ring-2 ring-blue-100 shadow-xs'
+                      : 'bg-white text-slate-700 hover:bg-slate-50 border-slate-200'
                   }`}
                 >
-                  <User className="w-3.5 h-3.5 shrink-0" />
-                  <span className="truncate">[👥 General Public]</span>
+                  <User className="w-4 h-4 text-blue-600 shrink-0" />
+                  <span className="truncate">👥 General Public</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setSelectedTier('sensitive_groups')}
-                  className={`p-2 rounded text-left transition flex items-center gap-1.5 border ${
+                  className={`p-2.5 rounded-xl text-left transition flex items-center gap-2 border cursor-pointer ${
                     selectedTier === 'sensitive_groups'
-                      ? 'bg-zinc-100 text-zinc-950 font-bold border-white'
-                      : 'bg-[#09090B] text-zinc-400 hover:text-white border-[#27272A]'
+                      ? 'bg-rose-50 text-rose-800 font-bold border-rose-300 ring-2 ring-rose-100 shadow-xs'
+                      : 'bg-white text-slate-700 hover:bg-slate-50 border-slate-200'
                   }`}
                 >
-                  <HeartPulse className="w-3.5 h-3.5 shrink-0 text-red-500" />
-                  <span className="truncate">[🫁 High-Risk &amp; Seniors]</span>
+                  <HeartPulse className="w-4 h-4 text-rose-600 shrink-0" />
+                  <span className="truncate">🫁 High-Risk &amp; Seniors</span>
                 </button>
               </div>
             </div>
 
             {/* Public Advisory Card Content */}
-            <div className="p-4 rounded-lg bg-[#09090B] border border-[#27272A] space-y-3 font-mono">
-              <div className="flex items-center justify-between border-b border-[#27272A] pb-2">
-                <span className="text-xs font-bold text-amber-300 uppercase flex items-center gap-1.5">
-                  <HeartPulse className="w-4 h-4 text-red-400" />
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
+                <span className="text-xs font-heading font-bold text-slate-900 uppercase flex items-center gap-1.5">
+                  <HeartPulse className="w-4 h-4 text-rose-600" />
                   {selectedTier === 'child_friendly'
                     ? 'SCHOOL & CHILD-FRIENDLY ADVISORY'
                     : selectedTier === 'general_public'
                     ? 'GENERAL PUBLIC AIR QUALITY BULLETIN'
                     : 'SPECIAL MEDICAL & VULNERABLE GROUP ADVISORY'}
                 </span>
-                <span className="text-[10px] text-zinc-500 uppercase">
+                <span className="text-[10px] font-mono font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full uppercase">
                   {selectedLang.toUpperCase()}
                 </span>
               </div>
 
-              <div className="whitespace-pre-line text-xs font-sans text-zinc-200 leading-relaxed bg-[#18181B] p-3.5 rounded border border-[#27272A]">
+              <div className="whitespace-pre-line text-sm font-sans text-slate-800 leading-relaxed bg-white p-4 rounded-lg border border-slate-200 shadow-2xs">
                 {currentAdvisoryText}
               </div>
 
               {/* Action Buttons for Broadcast */}
-              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#27272A]">
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={handleCopyWhatsApp}
-                  className="px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 font-mono text-xs font-bold text-white transition flex items-center gap-1.5 shadow"
+                  className="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 font-heading text-xs font-bold text-white transition flex items-center gap-1.5 shadow-xs cursor-pointer"
                 >
                   {copiedWhatsApp ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
-                  <span>{copiedWhatsApp ? 'Copied WhatsApp Msg' : '[📱 Copy WhatsApp Format]'}</span>
+                  <span>{copiedWhatsApp ? 'Copied WhatsApp Msg' : '📱 Copy WhatsApp Format'}</span>
                 </button>
 
                 <button
@@ -367,10 +388,10 @@ _Distributed via Civic Air Quality Briefing Studio_`;
                     link.download = `civic_advisory_${selectedLang}_${selectedTier}.txt`;
                     link.click();
                   }}
-                  className="px-3 py-1.5 rounded bg-[#18181B] border border-[#27272A] hover:border-zinc-400 font-mono text-xs font-semibold text-zinc-300 hover:text-white transition flex items-center gap-1.5"
+                  className="px-3.5 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700 transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 >
                   <Download className="w-3.5 h-3.5" />
-                  <span>[Download Text]</span>
+                  <span>Download Text</span>
                 </button>
               </div>
 

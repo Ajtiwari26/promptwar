@@ -9,6 +9,7 @@ import { InstantTriageBanner } from './types/decisionEngine.js';
 import { CivicBriefingOutput, CleanedReadingItemSchema, DataQualityFlagItemSchema } from './types/briefingSchema.js';
 import { PRESET_BASELINE_DAY, PRESET_CRISIS_DAY, PRESET_POST_INTERVENTION_DAY } from './data/presets.js';
 import { normalizeAndClassifyHotspots } from './services/fastDecisionEngine.js';
+import { downloadStructuredAuditJson, downloadCleanedTelemetryCsv, StructuredAuditPayload } from './services/structuredExport.js';
 import { z } from 'zod';
 
 type CleanedReading = z.infer<typeof CleanedReadingItemSchema>;
@@ -58,64 +59,55 @@ export const App: React.FC = () => {
   }, [token]);
 
   /**
-   * Evaluates input data deterministically (<2ms) and triggers backend pipeline
+   * Deterministic Fast Triage + Clean Audit Execution
    */
   const loadPresetData = (presetId: 'baseline' | 'crisis' | 'post_action') => {
+    setIsLoading(true);
     setActivePreset(presetId);
-    const rawRows = presetId === 'baseline'
+
+    const sourceRows = presetId === 'baseline'
       ? PRESET_BASELINE_DAY
       : presetId === 'crisis'
       ? PRESET_CRISIS_DAY
       : PRESET_POST_INTERVENTION_DAY;
 
-    // Fast deterministic evaluation in < 2ms
-    const engineOutput = normalizeAndClassifyHotspots(rawRows);
-    setTriage(engineOutput.instant_triage_banner);
+    // Run sub-second deterministic triage & normalization locally
+    const decision = normalizeAndClassifyHotspots(sourceRows);
 
-    const mappedReadings: CleanedReading[] = engineOutput.normalized_readings.map(r => ({
-      row_id: r.row_id,
-      sensor_id: r.sensor_id,
-      ward_name: r.ward_name,
-      timestamp_iso: r.timestamp_iso,
-      pollutant: r.pollutant,
-      raw_value: r.raw_value,
-      raw_unit: r.raw_unit,
-      normalized_value_ugm3: r.normalized_value_ugm3,
-      aqi_severity: r.aqi_severity,
-      validation_status: r.validation_status
-    }));
-    setReadings(mappedReadings);
-    setFlags(engineOutput.data_quality_flags);
+    setTriage(decision.instant_triage_banner);
+    setReadings(decision.normalized_readings as any);
+    setFlags(decision.data_quality_flags as any);
 
-    // Call server API asynchronously if token exists
-    if (token && token !== 'offline-demo-token') {
-      triggerServerAnalysis({ presetId });
-    }
+    // Also trigger server analysis in background if token available
+    triggerServerAnalysis({ presetId });
   };
 
-  const triggerServerAnalysis = async (payload: { text?: string; inlineData?: { data: string; mimeType: string }; presetId?: string }) => {
-    setIsLoading(true);
+  /**
+   * Server-Side Gemini Decision Proxy Call
+   */
+  const triggerServerAnalysis = async (payload: { text?: string; inlineData?: any; presetId?: string }) => {
     try {
       const res = await fetch('/api/briefing/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token || 'demo-token'}`
         },
-        body: JSON.stringify({
-          ...payload,
-          previousBrief
-        })
+        body: JSON.stringify(payload)
       });
 
       if (res.ok) {
         const data = await res.json();
         if (data.fastTriage) setTriage(data.fastTriage);
-        if (data.fullBrief) {
-          if (fullBrief) setPreviousBrief(fullBrief);
-          setFullBrief(data.fullBrief);
-          if (data.fullBrief.cleaned_readings) setReadings(data.fullBrief.cleaned_readings);
-          if (data.fullBrief.data_quality_flags) setFlags(data.fullBrief.data_quality_flags);
+        if (data.decisionContext?.normalized_readings) {
+          setReadings(data.decisionContext.normalized_readings);
+        }
+        if (data.decisionContext?.data_quality_flags) {
+          setFlags(data.decisionContext.data_quality_flags);
+        }
+        if (data.briefing) {
+          setPreviousBrief(fullBrief);
+          setFullBrief(data.briefing);
         }
       }
     } catch (err) {
@@ -152,15 +144,51 @@ export const App: React.FC = () => {
     }
   };
 
+  /**
+   * 1-Click Download Handler for Complete Structured Intelligence Package
+   */
+  const handleDownloadStructuredPackage = () => {
+    const payload: StructuredAuditPayload = {
+      metadata: {
+        system: "Civic Air Quality Briefing Studio",
+        version: "1.0.0",
+        export_timestamp_iso: new Date().toISOString(),
+        brief_reference_id: fullBrief?.brief_metadata?.brief_id || `BRIEF-${Date.now().toString().slice(-4)}`,
+        jurisdiction: "Municipal Command & Disaster Cell - Ward 04 Delhi NCR"
+      },
+      fast_triage: triage || {
+        alert_level: "NORMAL",
+        primary_headline: "All monitored wards within safe environmental limits.",
+        emergency_trigger_code: null,
+        urgent_action_required: false,
+        worst_affected_ward: null,
+        peak_pm25_ugm3: null,
+        detected_hotspots_count: 0,
+        unreliable_sensors_count: 0
+      },
+      hotspot_classifications: (fullBrief as any)?.classified_hotspots || [],
+      data_quality_flags: flags as any,
+      cleaned_telemetry_table: readings as any,
+      role_specific_actions: fullBrief?.role_specific_actions,
+      citizen_advisories: fullBrief?.dual_outputs?.citizen_advisories,
+      internal_briefing_note: fullBrief?.dual_outputs?.internal_briefing_note
+    };
+    downloadStructuredAuditJson(payload);
+  };
+
+  const handleDownloadTelemetryCsv = () => {
+    downloadCleanedTelemetryCsv(readings as any, activePreset || "export");
+  };
+
   // If user is not logged in, render Page 1 Secure Portal Login Gate
   if (!token) {
     return <LoginGate onLoginSuccess={handleLoginSuccess} />;
   }
 
   return (
-    <div className="min-h-screen bg-[#09090B] text-[#FAFAFA] flex flex-col font-sans selection:bg-zinc-700">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900">
       
-      {/* Persistent Authenticated Studio Shell (Top Bar + Fast Triage Banner) */}
+      {/* Persistent Authenticated Studio Shell (Top Bar + Fast Triage Banner + 1-Click Export) */}
       <Header
         currentTab={currentTab}
         onTabChange={setCurrentTab}
@@ -170,6 +198,9 @@ export const App: React.FC = () => {
         user={user}
         onLogout={handleLogout}
         onCitationClick={(rowId) => setSelectedCitation(rowId)}
+        onDownloadStructured={handleDownloadStructuredPackage}
+        onDownloadCsv={handleDownloadTelemetryCsv}
+        hasData={readings.length > 0}
       />
 
       {/* 3-Stage Connected Studio Workspace */}
@@ -216,8 +247,8 @@ export const App: React.FC = () => {
 
       </main>
 
-      {/* Persistent Footer */}
-      <footer className="border-t border-[#27272A] bg-[#09090B] py-3.5 px-6 text-center text-xs font-mono text-zinc-500">
+      {/* Persistent Light Institutional Footer */}
+      <footer className="border-t border-slate-200 bg-white py-4 px-6 text-center text-xs text-slate-500 font-sans">
         Civic Air Quality Briefing Studio • Google for Developers PromptWars • Build with AI
       </footer>
 
