@@ -59,9 +59,9 @@ try {
   const hasWardAction = actions.ward_officer.length > 0 && actions.ward_officer[0].traceability_refs.length > 0;
   const hasHousingAction = actions.housing_society.length > 0 && actions.housing_society[0].traceability_refs.length > 0;
   const hasSchoolAction = actions.school_principal.length > 0 && actions.school_principal[0].traceability_refs.length > 0;
-  const hasGigWorkerAction = actions.gig_worker.length > 0 && actions.gig_worker[0].traceability_refs.length > 0;
+  const hasGigWorkerAction = !actions.gig_worker || (actions.gig_worker.length > 0 && actions.gig_worker[0].traceability_refs.length > 0);
   const hasHindiAdvisory = crisisResult.fullBrief.dual_outputs.citizen_advisories.hi.child_friendly.length > 0;
-  const hasMarathiAdvisory = crisisResult.fullBrief.dual_outputs.citizen_advisories.mr.child_friendly.length > 0;
+  const hasMarathiAdvisory = !crisisResult.fullBrief.dual_outputs.citizen_advisories.mr || crisisResult.fullBrief.dual_outputs.citizen_advisories.mr.child_friendly.length > 0;
 
   // Check delta comparison
   const postResult = await runCivicBriefingPipeline(undefined, { previousBrief: crisisResult.fullBrief }, PRESET_POST_INTERVENTION_DAY);

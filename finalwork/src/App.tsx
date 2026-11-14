@@ -9,7 +9,7 @@ import { InstantTriageBanner } from './types/decisionEngine.js';
 import { CivicBriefingOutput, CleanedReadingItemSchema, DataQualityFlagItemSchema } from './types/briefingSchema.js';
 import { PRESET_BASELINE_DAY, PRESET_CRISIS_DAY, PRESET_POST_INTERVENTION_DAY } from './data/presets.js';
 import { normalizeAndClassifyHotspots } from './services/fastDecisionEngine.js';
-import { generateDeterministicGroundedBrief } from './services/geminiPipeline.js';
+import { generateDeterministicGroundedBrief } from './services/deterministicBrief.js';
 import { parseUniversalTelemetry } from './services/universalDataParser.js';
 import { downloadStructuredAuditJson, downloadCleanedTelemetryCsv, StructuredAuditPayload } from './services/structuredExport.js';
 import { z } from 'zod';

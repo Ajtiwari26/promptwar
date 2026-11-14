@@ -30,7 +30,7 @@ async function runTest() {
   assert(day2Result.fullBrief.role_specific_actions.school_principal.length > 0, "School principal has prioritized actions");
   assert(day2Result.fullBrief.role_specific_actions.gig_worker !== undefined && day2Result.fullBrief.role_specific_actions.gig_worker.length > 0, "Gig / outdoor delivery worker has prioritized actions");
   assert(day2Result.fullBrief.dual_outputs.citizen_advisories.hi.child_friendly.length > 0, "Hindi child-friendly advisory is populated");
-  assert(day2Result.fullBrief.dual_outputs.citizen_advisories.mr.child_friendly.length > 0, "Marathi child-friendly advisory is populated");
+  assert(day2Result.fullBrief.dual_outputs.citizen_advisories.mr?.child_friendly.length! > 0, "Marathi child-friendly advisory is populated");
 
   // Check citation grounding
   const allCitations = [
