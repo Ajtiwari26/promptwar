@@ -6,10 +6,10 @@ import { AuthenticatedUser } from '../../server/middleware/authGuard.js';
 export type StudioTab = 'ingest' | 'command' | 'publish';
 
 interface HeaderProps {
-  currentTab: StudioTab;
-  onTabChange: (tab: StudioTab) => void;
-  activeRole: 'ward_officer' | 'housing_society' | 'school_principal';
-  onRoleChange: (role: 'ward_officer' | 'housing_society' | 'school_principal') => void;
+  currentTab?: StudioTab;
+  onTabChange?: (tab: StudioTab) => void;
+  activeRole?: 'ward_officer' | 'housing_society' | 'school_principal';
+  onRoleChange?: (role: 'ward_officer' | 'housing_society' | 'school_principal') => void;
   triage: InstantTriageBanner | null;
   user: AuthenticatedUser | null;
   onLogout: () => void;
@@ -17,10 +17,10 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  currentTab,
-  onTabChange,
-  activeRole,
-  onRoleChange,
+  currentTab = 'ingest',
+  onTabChange = () => {},
+  activeRole = 'ward_officer',
+  onRoleChange = () => {},
   triage,
   user,
   onLogout,
@@ -154,34 +154,48 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* 3. Sub-Second Fast Triage Emergency Banner with role="alert" & aria-live="assertive" */}
-      {triage && (
-        <div
-          role="alert"
-          aria-live="assertive"
-          className={`px-4 sm:px-6 py-2 border-b transition-colors font-mono text-xs flex flex-col md:flex-row md:items-center justify-between gap-2 ${
-            isEmergency
-              ? 'bg-red-950 border-red-600 text-red-100'
-              : isWarning
-              ? 'bg-amber-950 border-amber-600 text-amber-100'
-              : 'bg-zinc-900 border-zinc-700 text-zinc-200'
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            {isEmergency ? (
+      <div
+        role="alert"
+        aria-live="assertive"
+        className={`px-4 sm:px-6 py-2 border-b transition-colors font-mono text-xs flex flex-col md:flex-row md:items-center justify-between gap-2 ${
+          !triage
+            ? 'bg-[#09090B] border-[#27272A] text-zinc-400'
+            : isEmergency
+            ? 'bg-red-950 border-red-600 text-red-100'
+            : isWarning
+            ? 'bg-amber-950 border-amber-600 text-amber-100'
+            : 'bg-zinc-900 border-zinc-700 text-zinc-200'
+        }`}
+      >
+        <div className="flex items-center gap-2">
+          {!triage ? (
+            <>
+              <span className="text-zinc-500">●</span>
+              <span className="font-bold text-zinc-300">SYSTEM STANDBY:</span>
+              <span className="text-zinc-400">Awaiting telemetry input — Select a demo preset or upload sensor streams below</span>
+            </>
+          ) : isEmergency ? (
+            <>
               <Triangle className="w-4 h-4 text-red-400 fill-red-400 shrink-0" />
-            ) : isWarning ? (
+              <span className="font-bold tracking-tight">▲ CRITICAL FAST TRIAGE:</span>
+              <span className="font-medium text-xs">{triage.primary_headline}</span>
+            </>
+          ) : isWarning ? (
+            <>
               <AlertTriangle className="w-4 h-4 text-amber-400 fill-amber-400 shrink-0" />
-            ) : (
+              <span className="font-bold tracking-tight">◆ WARNING FAST TRIAGE:</span>
+              <span className="font-medium text-xs">{triage.primary_headline}</span>
+            </>
+          ) : (
+            <>
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            )}
-            <span className="font-bold tracking-tight">
-              {isEmergency ? '▲ CRITICAL FAST TRIAGE:' : isWarning ? '◆ WARNING FAST TRIAGE:' : '● NORMAL MONITORING:'}
-            </span>
-            <span className="font-medium text-xs">
-              {triage.primary_headline}
-            </span>
-          </div>
+              <span className="font-bold tracking-tight">● NORMAL MONITORING:</span>
+              <span className="font-medium text-xs">{triage.primary_headline}</span>
+            </>
+          )}
+        </div>
 
+        {triage ? (
           <div className="flex items-center gap-2 text-[11px] shrink-0">
             {triage.emergency_trigger_code && (
               <span className="px-1.5 py-0.5 rounded bg-black/50 border border-white/20 font-bold">
@@ -199,8 +213,12 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             )}
           </div>
-        </div>
-      )}
+        ) : (
+          <span className="text-[10px] text-zinc-500 font-mono">
+            Deterministic Decision Engine Online (<span className="text-emerald-400">&lt;5ms</span>)
+          </span>
+        )}
+      </div>
 
     </header>
   );
