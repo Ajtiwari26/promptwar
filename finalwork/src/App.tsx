@@ -186,7 +186,7 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900">
+    <div className="min-h-screen bg-[#F2F9F5] text-slate-900 flex flex-col font-sans selection:bg-emerald-100 selection:text-emerald-900">
       
       {/* Persistent Authenticated Studio Shell (Top Bar + Fast Triage Banner + 1-Click Export) */}
       <Header

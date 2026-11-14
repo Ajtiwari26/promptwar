@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { History, TrendingUp, TrendingDown, Minus, Wind, AlertTriangle, ShieldCheck, CheckSquare, Square, X, ChevronUp, ChevronDown, CheckCircle2, MapPin, Eye, ArrowRight } from 'lucide-react';
+import { History, TrendingUp, TrendingDown, Minus, Wind, AlertTriangle, ShieldCheck, CheckSquare, Square, X, ChevronUp, ChevronDown, CheckCircle2, MapPin, Eye, ArrowRight, CheckCircle, Leaf } from 'lucide-react';
 import { TraceabilityChip } from './TraceabilityChip.js';
 import { StatusBadge } from './StatusBadge.js';
 import {
@@ -48,12 +48,12 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
     : [
         {
           hotspot_location: "Ward 4 - Industrial Belt",
-          finding_summary: "Archetype: Coarse Dust & Morning Thermal Inversion Trap. PM2.5 hit 310.0 µg/m³ with wind speed <1m/s, trapping surface particulate resuspension near ground level.",
+          finding_summary: "Acute Combustion Plume & Morning Thermal Inversion Trap. Heavy diesel generator testing and open biomass fires caused PM2.5 to hit 310.0 µg/m³. Calm morning winds (<1m/s) trapped ground resuspension in residential pockets.",
           traceability_refs: ["ROW_04", "ROW_05"]
         },
         {
           hotspot_location: "Ward 2 - Telemetry Blind Spot",
-          finding_summary: "Unverified due to sensor fault. SNS_W02_03 returned -999 optical sensor error code. Hardware technician dispatch required before air quality can be verified.",
+          finding_summary: "Hardware Sensor Outage. SNS_W02_03 returned -999 optical sensor fault code. Telemetry channel designated as unverified blind spot pending field technician dispatch.",
           traceability_refs: ["ROW_07"]
         }
       ];
@@ -167,10 +167,10 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
     <div className="space-y-6 pb-24">
       
       {/* 1. TOP DELTA DIFF STRIP ("WHAT CHANGED SINCE PREVIOUS BRIEF") */}
-      <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-4">
+      <div className="p-5 rounded-2xl border border-emerald-100 bg-white shadow-2xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
-            <History className="w-4 h-4 text-blue-600" />
+            <History className="w-4 h-4 text-emerald-600" />
             <span className="font-heading text-xs font-bold uppercase tracking-wider text-slate-900">
               🔄 WHAT CHANGED SINCE PREVIOUS BRIEF (Compared to: BRIEF-13-NOV-AM)
             </span>
@@ -210,10 +210,10 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
           </div>
 
           {/* Delta Card 3: Sensor Hardware Fault */}
-          <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-            <div className="flex items-center justify-between text-xs font-heading font-bold text-slate-800">
+          <div className="p-4 rounded-xl border border-emerald-100 bg-emerald-50/30 flex flex-col justify-between">
+            <div className="flex items-center justify-between text-xs font-heading font-bold text-emerald-900">
               <span>🛠 NEW SENSOR FAULTS: +1</span>
-              <span className="text-[10px] bg-slate-200 text-slate-700 font-mono px-2 py-0.5 rounded-full">
+              <span className="text-[10px] bg-emerald-200/80 text-emerald-900 font-mono px-2 py-0.5 rounded-full">
                 HARDWARE
               </span>
             </div>
@@ -232,21 +232,22 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
         {/* LEFT COLUMN: DETECTED HOTSPOTS & PLAIN SUMMARY           */}
         {/* ======================================================== */}
         <div className="lg:col-span-6 space-y-4">
-          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-4">
+          <div className="p-5 rounded-2xl border border-emerald-100 bg-white shadow-2xs space-y-4">
             
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-blue-600" />
+                <MapPin className="w-4 h-4 text-emerald-600" />
                 <span className="font-heading text-xs font-bold uppercase tracking-wider text-slate-900">
-                  DETECTED HOTSPOTS &amp; PLAIN SUMMARY
+                  DETECTED HOTSPOTS &amp; INCIDENT EXPLANATION
                 </span>
               </div>
               <span className="text-xs text-slate-500 font-mono">
-                {hotspots.length} Zones Identified
+                {hotspots.length} Zones Analyzed
               </span>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-3.5">
+              {/* Hotspot Incident Cards with "What Happened There" */}
               {hotspots.map((item, idx) => (
                 <div
                   key={idx}
@@ -254,7 +255,7 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
                 >
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <span className="font-heading font-bold text-xs text-slate-900 flex items-center gap-1.5">
-                      <span className="text-blue-600">📍</span>
+                      <span className="text-rose-600">📍</span>
                       {item.hotspot_location}
                     </span>
                     <StatusBadge
@@ -264,10 +265,16 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
                     />
                   </div>
 
-                  <p className="text-xs text-slate-700 leading-relaxed">
-                    <strong className="text-slate-900 block mb-0.5 font-heading">Plain Summary:</strong>
-                    {item.finding_summary}
-                  </p>
+                  {/* Root Cause & What Happened Summary */}
+                  <div className="space-y-1">
+                    <span className="text-[11px] font-heading font-bold uppercase tracking-wide text-rose-800 flex items-center gap-1">
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                      What Happened There:
+                    </span>
+                    <p className="text-xs text-slate-700 leading-relaxed pl-1">
+                      {item.finding_summary}
+                    </p>
+                  </div>
 
                   <div className="flex items-center gap-2 pt-1 border-t border-slate-200/60 text-xs">
                     <span className="text-slate-500 text-[11px] font-semibold">Evidence:</span>
@@ -284,6 +291,29 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
                   </div>
                 </div>
               ))}
+
+              {/* Dedicated "Normal Data Baseline" Card */}
+              <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-heading font-bold text-xs text-emerald-950 flex items-center gap-1.5">
+                    <Leaf className="w-3.5 h-3.5 text-emerald-600" />
+                    Ward 1 — Green Belt North &amp; Residential Basin
+                  </span>
+                  <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full">
+                    ● NORMAL DATA
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[11px] font-heading font-bold uppercase tracking-wide text-emerald-800 flex items-center gap-1">
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                    Environmental Baseline Status:
+                  </span>
+                  <p className="text-xs text-emerald-900/80 leading-relaxed pl-1">
+                    Normal calibrated telemetry (PM2.5: 74.5 µg/m³). Tree canopy buffer absorbing vehicular drift; readings remain well within CPCB safe thresholds. Zero emergency enforcement required in this sector.
+                  </p>
+                </div>
+              </div>
+
             </div>
 
           </div>
@@ -293,18 +323,18 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
         {/* RIGHT COLUMN: PRIORITIZED ACTIONS (PERSONA-ADAPTIVE)     */}
         {/* ======================================================== */}
         <div className="lg:col-span-6 space-y-4">
-          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-4">
+          <div className="p-5 rounded-2xl border border-emerald-100 bg-white shadow-2xs space-y-4">
             
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 flex-wrap gap-2">
               <div>
                 <span className="font-heading text-xs font-bold uppercase tracking-wider text-slate-900 block">
-                  PRIORITIZED ACTIONS FOR: <span className="text-blue-600 font-extrabold">[{roleTitle}]</span>
+                  PRIORITIZED ACTIONS FOR: <span className="text-emerald-700 font-extrabold">[{roleTitle}]</span>
                 </span>
                 <span className="text-xs text-slate-500">
                   0ms persona adaptation • Click checkboxes to track dispatch
                 </span>
               </div>
-              <span className="text-xs font-mono font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
+              <span className="text-xs font-mono font-bold bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded-full border border-emerald-200">
                 {Object.values(completedActions).filter(Boolean).length} / {roleActions.length} Executed
               </span>
             </div>
@@ -336,7 +366,7 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
                           e.stopPropagation();
                           toggleAction(idx);
                         }}
-                        className="mt-0.5 text-slate-400 hover:text-blue-600 shrink-0 cursor-pointer"
+                        className="mt-0.5 text-slate-400 hover:text-emerald-600 shrink-0 cursor-pointer"
                         aria-label={`Toggle action item ${idx + 1}`}
                       >
                         {isChecked ? (
@@ -360,7 +390,7 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
                               ◆ HIGH
                             </span>
                           ) : (
-                            <span className="text-[10px] font-heading font-bold uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200 px-2 py-0.5 rounded-full">
+                            <span className="text-[10px] font-heading font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full">
                               ● ROUTINE
                             </span>
                           )}
@@ -394,7 +424,7 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
             <div className="pt-3 border-t border-slate-100 flex justify-end">
               <button
                 onClick={onNavigateToPublish}
-                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-heading font-bold uppercase tracking-wider flex items-center gap-2 transition cursor-pointer shadow-xs"
+                className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-heading font-bold uppercase tracking-wider flex items-center gap-2 transition cursor-pointer shadow-xs"
               >
                 <span>Proceed to Step 3: Publish Dual Outputs</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -409,14 +439,14 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
       {/* 3. SLIDE-UP TRACEABILITY INSPECTOR DRAWER (Pinned at Bottom) */}
       {selectedCitation && (
         <div
-          className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t-2 border-blue-600 shadow-2xl transition-transform"
+          className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t-2 border-emerald-600 shadow-2xl transition-transform"
           role="region"
           aria-label="Traceability Source Inspector"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5">
             <div className="flex items-center justify-between border-b border-slate-200 pb-2">
               <div className="flex items-center gap-2 text-xs font-heading font-bold text-slate-900">
-                <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
                 <span>TRACEABILITY SOURCE EVIDENCE INSPECTOR</span>
                 <span className="text-slate-500 font-normal">
                   (Physical row verified against sensor hardware stream)
@@ -443,7 +473,7 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
             {isInspectorExpanded && (
               <div className="pt-3 text-xs">
                 {inspectedRow ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 bg-emerald-50/40 p-3.5 rounded-xl border border-emerald-100">
                     <div>
                       <span className="text-slate-500 block text-[10px] font-heading font-semibold uppercase">Row ID</span>
                       <strong className="text-slate-900 font-mono text-sm">{inspectedRow.row_id}</strong>
@@ -468,7 +498,7 @@ export const CommandDiffView: React.FC<CommandDiffViewProps> = ({
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+                  <div className="bg-emerald-50/40 p-3.5 rounded-xl border border-emerald-100 flex items-center justify-between text-xs">
                     <div>
                       Highlighted Source: <strong className="text-slate-900 font-mono">{selectedCitation}</strong> | Sensor: <strong className="text-slate-700 font-mono">SNS_W04_01</strong> | Time: <strong className="text-slate-700 font-mono">08:00</strong> | Raw: <strong className="text-amber-800 font-mono">0.31 mg/m³ -&gt; 310.0 µg/m³</strong>
                     </div>
