@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #09090B;
+    color: #FAFAFA;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* High-contrast WCAG focus rings */
+  *:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px #FAFAFA, 0 0 0 4px #09090B;
+  }
+}
+
+/* Striped pattern for sensor fault rows / indicators */
+.bg-striped-fault {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(39, 39, 42, 0.7),
+    rgba(39, 39, 42, 0.7) 10px,
+    rgba(24, 24, 27, 0.7) 10px,
+    rgba(24, 24, 27, 0.7) 20px
+  );
+}
+
+/* Custom crisp dark scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #09090B;
+}
+::-webkit-scrollbar-thumb {
+  background: #27272A;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3F3F46;
+}
